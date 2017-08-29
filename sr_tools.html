@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="us">
+<head>
+	<meta charset="utf-8">
+	<title>Shadowrun GM Tools</title>
+	<link href="css/jquery-ui.css" rel="stylesheet">
+	<link href="css/sr_tools.css" rel="stylesheet">
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery-ui.js"></script>
+	<script src="js/sr_tools.js"></script>
+	<script>
+		$(function()
+		{
+			setup_controls();
+		});
+	</script>
+</head>
+<body>
+<div class="top_bar">
+	<div class="title">Shadowrun GM Tools</div>
+	<div class="top_bar_roller">
+		<div class="numbers">
+			<div class="row">
+				<button roll="1">01</button>
+				<button roll="2">02</button>
+				<button roll="3">03</button>
+				<button roll="4">04</button>
+				<button roll="5">05</button>
+				<button roll="6">06</button>
+				<button roll="7">07</button>
+				<button roll="8">08</button>
+				<button roll="9">09</button>
+				<button roll="10">10</button>
+			</div>
+			<div class="row">
+				<button roll="11">11</button>
+				<button roll="12">12</button>
+				<button roll="13">13</button>
+				<button roll="14">14</button>
+				<button roll="15">15</button>
+				<button roll="16">16</button>
+				<button roll="17">17</button>
+				<button roll="18">18</button>
+				<button roll="19">19</button>
+				<button roll="20">20</button>
+			</div>
+			<div class="row">
+				<button roll="21">21</button>
+				<button roll="22">22</button>
+				<button roll="23">23</button>
+				<button roll="24">24</button>
+				<button roll="25">25</button>
+				<button roll="26">26</button>
+				<button roll="27">27</button>
+				<button roll="28">28</button>
+				<button roll="29">29</button>
+				<button roll="30">30</button>
+			</div>
+			<div class="row">
+				<button roll="31">31</button>
+				<button roll="32">32</button>
+				<button roll="33">33</button>
+				<button roll="34">34</button>
+				<button roll="35">35</button>
+				<button roll="36">36</button>
+				<button roll="37">37</button>
+				<button roll="38">38</button>
+				<button roll="39">39</button>
+				<button roll="40">40</button>
+			</div>
+		</div>
+		<div class="edging">
+			<div class="row">
+				<input type="radio" id="explode" name="radio">
+				<label for="explode">Explode</label>
+			</div>
+			<div class="row">
+				<input type="radio" id="normal" name="radio" checked="checked">
+				<label for="normal">Normal</label>
+			</div>
+		</div>
+		<div class="roll_results"><textarea id="roll_results"></textarea></div>
+	</div>
+</div>
+
+<div class="menu">
+	<button class="cast">Cast of Shadows</button>
+	<button class="minion">NPC Generator</button>
+	<button class="contact">Contact Generator</button>
+	<button class="run">Run Generator</button>
+	<button class="settings">Settings</button>
+</div>
+
+<div class="main_content"></div>
+
+
+<div template_holder>
+	<div template="main_screen">Main Screen turn on!</div>
+
+	<div template="settings">
+		<h2>Settings</h2>
+		<div class="row">
+			<div class="description">This will remove all settings, NPCs, everything. It's the frag grenade in the china shop. Everything will be lost, nothing will be saved.</div>
+			<button id="delete_localstorage">Nuke it from orbit</button>
+		</div>
+
+		<div class="delete_localstorage_dialog">
+			<p>This option cannot be undone. Once you delete everything here, you'll have to start all over again. On the plus side, this is great if you want to make sure no decker finds traces of your activities here.</p>
+		</div>
+	</div>
+
+	<div template="minion_generator_section">
+		<div class="overview">
+			<p>Welcome to the Minion Generator section of SR:GM Tools. Here I want to put some introduction to what's going on.</p>
+			<p>When generating a NPC, there are several categories and overall options you can choose from or leave it all up to chance. After the NPC is created, you can further edit them in the <b>Cast of Shadows</b> section.</p>
+			<p>Generating a group of NPCs works similarly, defining only broad strokes here and letting you individually refine the NPCs later.</p>
+		</div>
+		<div class="section_tabs">
+			<ul>
+				<li><a href="#minion_generator">Individual NPC Generator</a></li>
+				<li><a href="#mob_generator">Group of NPCs Generator</a></li>
+			</ul>
+			<div id="minion_generator">
+				<div class="entry_form">
+					<div class="input_row">
+						<label equalize>Name</label>
+						<input name="name" placeholder="Random NPC"/>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Race</label>
+						<select name="race">
+							<option value="">- Random</option>
+							<option value="Human">Human</option>
+							<option value="Elf">Elf</option>
+							<option value="Dwarf">Dwarf</option>
+							<option value="Ork">Ork</option>
+							<option value="Troll">Troll</option>
+						</select>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Gender</label>
+						<select name="gender">
+							<option value="">- Random</option>
+							<option value="Male">Male</option>
+							<option value="Female">Female</option>
+						</select>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Professional Rating</label>
+						<select name="professional_rating">
+							<option value="">- Random</option>
+							<option value="0">0</option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+						</select>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Professional Type</label>
+						<select name="professional_type">
+							<option value="">- Random</option>
+							<option value="civilian">Civilian</option>
+							<option value="thug">Thugs & Protesters</option>
+							<option value="ganger">Gang Member</option>
+							<option value="corpsec">Corporate Security</option>
+							<option value="police">Police (KE & LS)</option>
+							<option value="mob">Organized Crime</option>
+							<option value="cultist">Cultists & Politicos</option>
+							<option value="htr">High Threat Response</option>
+							<option value="specops">Special Operations</option>
+						</select>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Special Type?</label>
+						<select name="is_special">
+							<option value="no">- No</option>
+							<option value="is_lt">Lieutenant</option>
+							<option value="is_decker">Decker</option>
+							<option value="is_adept">Physical Adept</option>
+							<option value="is_mage">Full Magician</option>
+						</select>
+					</div>
+
+					<div class="spacer_20"></div>
+
+					<button id="generate_minion">Generate NPC</button>
+
+					<div id="generated_results"></div>
+				</div>
+			</div>
+			<div id="mob_generator">
+				<!--
+				Options:
+				Number of mobs
+				Professional Rating
+				Professional Type
+				All same race (default no)
+				All same gender (default no, options of 'no', male, female)
+				-->
+				<p>Big Form Here</p>
+			</div>
+		</div>
+	</div>
+
+	<div template="render__display_npc">
+		<div class="display_npc_wrapper">
+			<div class="controls"></div>
+			<div class="npc_name"></div>
+			<div class="npc_description"></div>
+			<div class="attribute_names">
+				<div class="attribute_name">BOD</div>
+				<div class="attribute_name">AGI</div>
+				<div class="attribute_name">REA</div>
+				<div class="attribute_name">STR</div>
+				<div class="attribute_name">WIL</div>
+				<div class="attribute_name">LOG</div>
+				<div class="attribute_name">INT</div>
+				<div class="attribute_name">CHA</div>
+				<div class="attribute_name essence">ESS</div>
+				<div class="attribute_name magic">MAG</div>
+			</div>
+
+			<div class="attribute_values">
+				<div class="attribute_value body"></div>
+				<div class="attribute_value agility"></div>
+				<div class="attribute_value reaction"></div>
+				<div class="attribute_value strength"></div>
+				<div class="attribute_value will"></div>
+				<div class="attribute_value logic"></div>
+				<div class="attribute_value intuition"></div>
+				<div class="attribute_value charisma"></div>
+				<div class="attribute_value essence"></div>
+				<div class="attribute_value magic"></div>
+			</div>
+
+			<div class="information">
+				<div class="initiative">
+					<label>Initiative</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="astral_initiative">
+					<label>Astral Initiative</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="matrix_initiative">
+					<label>Matrix Initiative (Hot VR)</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="damage_resistance">
+					<label>Damage Resistance</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="condition_monitor">
+					<label>Condition Monitor</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="limits">
+					<label>Limits</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="qualities">
+					<label>Qualities</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="initiate_grade">
+					<label>Initiate Grade</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="skills">
+					<label>Skills</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="augments">
+					<label>Augmentations</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="armor">
+					<label>Armor</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="gear">
+					<label>Gear</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="spells">
+					<label>Spells</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="powers">
+					<label>Powers</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="programs">
+					<label>Programs</label>
+					<div class="value"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!--
+Here is the current todo list:
+--
+-
+Once I have it console-ing the mobs from UI controls, then go back to the cast section.
+Cast section needs to be tabs of things, blank at first with a message.
+If all tabs are deleted, re-show that message.
+Figure out how to add tabs and make them UI-able
+Figure out how to remove tabs and not break things
+Test refreshing the page, start from scratch.
+Add a "delete all" button.
+-
+See about storing mooks in Local Storage, so that a refresh is not a disaster.
+Add in more settings options:
+--	alternate condition monitor displays, wound modifiers
+-
+Knock out the Contact Generation portion
+-
+Run Generation!
+This should be the bare-bones first, with a straight-from-book display.
+-
+PDF generation!
+I want to be able to export things to PDF.
+Mooks will hopefully be 2 or 4 per printed page, fold down if possible.
+Contacts will probably be folded over instead, with more space for more description like preferences
+-
+Add versioning to Local Storage. If it doesn't meet the current version, then destroy it all and start from scratch.
+-
+Lots more detail for Contact generation
+-
+Lots more detail for Run generation
+
+
+
+
+-->
+
+</body>
+</html>

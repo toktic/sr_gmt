@@ -1,0 +1,295 @@
+body{
+	background-color: #383838;
+	font-family: "Trebuchet MS", sans-serif;
+	margin: 50px;
+}
+
+
+
+/*.demoHeaders {*/
+	/*margin-top: 2em;*/
+/*}*/
+/*#dialog-link {*/
+	/*padding: .4em 1em .4em 20px;*/
+	/*text-decoration: none;*/
+	/*position: relative;*/
+/*}*/
+/*#dialog-link span.ui-icon {*/
+	/*margin: 0 5px 0 0;*/
+	/*position: absolute;*/
+	/*left: .2em;*/
+	/*top: 50%;*/
+	/*margin-top: -8px;*/
+/*}*/
+/*#icons {*/
+	/*margin: 0;*/
+	/*padding: 0;*/
+/*}*/
+/*#icons li {*/
+	/*margin: 2px;*/
+	/*position: relative;*/
+	/*padding: 4px 0;*/
+	/*cursor: pointer;*/
+	/*float: left;*/
+	/*list-style: none;*/
+/*}*/
+/*#icons span.ui-icon {*/
+	/*float: left;*/
+	/*margin: 0 4px;*/
+/*}*/
+/*.fakewindowcontain .ui-widget-overlay {*/
+	/*position: absolute;*/
+/*}*/
+/*select {*/
+	/*width: 200px;*/
+/*}*/
+
+
+
+
+
+
+
+
+.smaller_button
+{
+	font-weight: normal;
+	padding: 1px 3px;
+	font-size: 0.7em;
+}
+
+.smaller_button:hover
+{
+	font-weight: normal;
+}
+
+
+
+
+
+
+.top_bar
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	background-color: #383838;
+	height: 90px;
+}
+
+.top_bar .title
+{
+	font-size: 28px;
+	font-weight: bold;
+	color: #fff;
+	margin-top: 24px;
+	margin-left: 24px;
+}
+
+.top_bar .top_bar_roller
+{
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+.top_bar .top_bar_roller > div
+{
+	display: inline-block;
+	vertical-align: top;
+}
+
+.top_bar .top_bar_roller .edging
+{
+	color: #fff;
+	margin-top: 24px;
+}
+
+.top_bar .top_bar_roller #roll_results
+{
+	background-color: #383838;
+	color: #fff;
+	height: 84px;
+	width: 450px;
+}
+
+.menu
+{
+	position: absolute;
+	top: 90px;
+	left: 0;
+	bottom: 0;
+	width: 250px;
+	background-color: #383838;
+}
+
+.menu button
+{
+	width: 200px;
+	margin-left: 24px;
+	margin-top: 10px;
+}
+
+
+
+
+.main_content
+{
+	position: absolute;
+	top: 90px;
+	bottom: 0;
+	left: 250px;
+	right: 0;
+	background-color: #383838;
+	color: #fff;
+}
+
+div[template_holder]
+{
+	display: none;
+}
+
+
+
+.entry_form
+{
+
+}
+
+.entry_form > .input_row
+{
+	padding-bottom: 2px;
+}
+
+.entry_form > .input_row label
+{
+	display: inline-block;
+}
+.entry_form > .input_row select
+{
+	width: 200px;
+}
+
+
+
+
+.spacer_5
+{
+	height: 5px;
+}
+
+.spacer_10
+{
+	height: 10px;
+}
+
+.spacer_15
+{
+	height: 15px;
+}
+
+.spacer_20
+{
+	height: 20px;
+}
+
+.spacer_25
+{
+	height: 25px;
+}
+
+.spacer_30
+{
+	height: 30px;
+}
+
+.spacer_35
+{
+	height: 35px;
+}
+
+.spacer_40
+{
+	height: 40px;
+}
+
+.spacer_45
+{
+	height: 45px;
+}
+
+
+#minion_generator
+{
+
+}
+
+#minion_generator .entry_form
+{
+
+}
+
+#minion_generator .entry_form #generated_results
+{
+	width: 650px;
+	margin-top: 20px;
+}
+
+.display_npc_wrapper
+{
+	border: 1px solid #ccee00;
+	font-size: 0.9em;
+}
+
+.display_npc_wrapper .npc_name,
+.display_npc_wrapper .npc_description
+{
+	border-bottom: 1px solid #ccee00;
+	padding: 2px 2px 2px 4px;
+}
+.display_npc_wrapper .attribute_names
+{
+	border-bottom: 1px solid #ccee00;
+	display: flex;
+	font-weight: bold;
+	font-size: 1.1em;
+}
+.display_npc_wrapper .attribute_values
+{
+	border-bottom: 1px solid #ccee00;
+	display: flex;
+}
+
+.display_npc_wrapper .attribute_names .attribute_name,
+.display_npc_wrapper .attribute_values .attribute_value
+{
+	text-align: center;
+	flex-grow: 1;
+	flex-basis: 10%;
+}
+
+.display_npc_wrapper .information > div
+{
+	background-color: #383838;
+	display: table;
+	width: 100%
+}
+
+.display_npc_wrapper .information label
+{
+	padding: 2px;
+	width: 160px;
+	display: table-cell;
+	vertical-align: top;
+	color: #ccee00;
+	background-color: #000;
+	font-weight: bold;
+}
+
+.display_npc_wrapper .information .value
+{
+	padding: 2px;
+	display: table-cell;
+	vertical-align: top;
+}
