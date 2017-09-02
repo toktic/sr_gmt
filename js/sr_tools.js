@@ -100,7 +100,7 @@ var db = {
 				res.skills.Blades = 2 + rating;
 				res.skills.Clubs = 2 + rating;
 				res.skills.Intimidation = 2 + rating;
-				res.skills.Unarmed = 2 + rating;
+				res.skills['Unarmed Combat'] = 2 + rating;
 				res.weapons.push('Club');
 				res.weapons.push('Knife');
 				break;
@@ -116,7 +116,7 @@ var db = {
 				res.skills.Etiquette = 2 + rating;
 				res.skills.Intimidation = 3 + rating;
 				res.skills.Pistols = 3 + rating;
-				res.skills.Unarmed = 2 + rating;
+				res.skills['Unarmed Combat'] = 2 + rating;
 				res.qualities.positive.push('Toughness');
 				res.armor.push('Armor Vest');
 				res.weapons.push('Browning Ultra-Power');
@@ -135,7 +135,7 @@ var db = {
 				res.skills.Perception = rating;
 				res.skills.Pistols = 2 + rating;
 				res.skills.Running = 3 + Math.floor(rating / 2);
-				res.skills.Unarmed = 1 + rating;
+				res.skills['Unarmed Combat'] = 1 + rating;
 				res.armor.push('Armor Jacket');
 				res.weapons.push('Colt Cobra TZ-120');
 				res.weapons.push('Fichetti Security 600');
@@ -151,7 +151,7 @@ var db = {
 				res.skills.Perception = rating;
 				res.skills.Pistols = 3 + Math.floor(rating / 2);
 				res.skills.Running = 1 + Math.floor(rating / 2);
-				res.skills.Unarmed = 1 + rating;
+				res.skills['Unarmed Combat'] = 1 + rating;
 				res.knowledge_skills['Law Enforcement'] = 1 + rating;
 				res.knowledge_skills['Local Crime'] = rating;
 				res.armor.push('Armor Jacket');
@@ -175,7 +175,7 @@ var db = {
 				res.skills.Intimidation = 2 + rating;
 				res.skills.Perception = Math.floor(rating / 2);
 				res.skills.Pistols = rating;
-				res.skills.Unarmed = 2 + rating;
+				res.skills['Unarmed Combat'] = 2 + rating;
 				res.qualities.positive.push('Toughness');
 				res.armor.push('Lined Coat');
 				res.weapons.push('Knife');
@@ -190,7 +190,7 @@ var db = {
 				res.attributes.logic = 1;
 				res.skills.Blades = 2 + rating;
 				res.skills.Clubs = 2 + rating;
-				res.skills.Unarmed = 2 + rating;
+				res.skills['Unarmed Combat'] = 2 + rating;
 				res.skills.Gymnastics = 1 + rating;
 				res.skills.Running = 1 + rating;
 				res.skills.Swimming = 1 + rating;
@@ -211,18 +211,21 @@ var db = {
 					rating: 2,
 					augments: ['Flare Compensation', 'Image link', 'Smartlink', 'Thermographic vision']
 				});
-				res.augmentations.push({
-					name: 'Muscle Augmentation',
-					rating: 2
-				});
-				res.augmentations.push({
-					name: 'Muscle Toner',
-					rating: 2
-				});
-				res.augmentations.push({
-					name: 'Wired Reflexes',
-					rating: 2
-				});
+				if (rating > 2)
+				{
+					res.augmentations.push({
+						name: 'Muscle Augmentation',
+						rating: Math.ceil(rating / 3)
+					});
+					res.augmentations.push({
+						name: 'Muscle Toner',
+						rating: Math.ceil(rating / 3)
+					});
+					res.augmentations.push({
+						name: 'Wired Reflexes',
+						rating: Math.ceil(rating / 3)
+					});
+				}
 				break;
 
 			case 'specops':
@@ -234,7 +237,7 @@ var db = {
 				res.attributes.charisma = 1;
 				res.skills.Blades = 2 + rating;
 				res.skills.Clubs = 2 + rating;
-				res.skills.Unarmed = 2 + rating;
+				res.skills['Unarmed Combat'] = 2 + rating;
 				res.skills.Gymnastics = 1 + rating;
 				res.skills.Running = 1 + rating;
 				res.skills.Swimming = 1 + rating;
@@ -257,18 +260,21 @@ var db = {
 					ammo: 'APDS'
 				});
 				res.commlink = rating - 1;
-				res.augmentations.push({
-					name: 'Muscle Augmentation',
-					rating: 3
-				});
-				res.augmentations.push({
-					name: 'Muscle Toner',
-					rating: 3
-				});
-				res.augmentations.push({
-					name: 'Synaptic Booster',
-					rating: 3
-				});
+				if (rating > 0)
+				{
+					res.augmentations.push({
+						name: 'Muscle Augmentation',
+						rating: Math.ceil(rating / 2)
+					});
+					res.augmentations.push({
+						name: 'Muscle Toner',
+						rating: Math.ceil(rating / 2)
+					});
+					res.augmentations.push({
+						name: 'Synaptic Booster',
+						rating: Math.ceil(rating / 2)
+					});
+				}
 				break;
 
 			case 'cultist':
@@ -327,7 +333,7 @@ var db = {
 					res.skills.Clubs = 1;
 					res.skills.Intimidation = 2;
 					res.skills.Pistols = 3;
-					res.skills.Unarmed = 1;
+					res.skills['Unarmed Combat'] = 1;
 					res.weapons.push('Colt America L36');
 					break;
 
@@ -340,7 +346,7 @@ var db = {
 					res.attributes.charisma = 1;
 					res.skills.Etiquette = 3 + rating;
 					res.skills.Leadership = 2;
-					res.skills.Unarmed = 3 + rating;
+					res.skills['Unarmed Combat'] = 3 + rating;
 					res.augmentations.push('Spur');
 					res.armor.push('Armor Jacket');
 					break;
@@ -372,7 +378,7 @@ var db = {
 					res.skills.Automatics = 1 + rating;
 					res.skills.Blades = 3 + rating;
 					res.skills.Clubs = 3 + rating;
-					res.skills.Unarmed = 3 + rating;
+					res.skills['Unarmed Combat'] = 3 + rating;
 					res.skills.Perception = 2 + rating;
 					res.skills.Leadership = 2 + rating;
 					res.skills.Sneaking = rating;
@@ -392,7 +398,7 @@ var db = {
 					res.attributes.charisma = 1;
 					res.skills.Etiquette = 3 + rating;
 					res.skills.Leadership = 2;
-					res.skills.Unarmed = 3 + rating;
+					res.skills['Unarmed Combat'] = 3 + rating;
 					res.armor.push('Armor Jacket');
 					res.augmentations.push('Spur');
 					res.gear.push('Jazz (2)');
@@ -1698,7 +1704,7 @@ var render = {
 		// Fill in the name
 		$mook.find('.npc_name').html(data.name);
 
-		// Fill in the descrption
+		// Fill in the description
 		var description = data.gender + ' ' + data.race + ', Rating ' + data.professional_rating + ' ' + data.professional_description;
 
 		if (data.special.is_lt)
@@ -1885,6 +1891,11 @@ var render = {
 		var soak = (data.qualities.positive.includes('Toughness')) ? 1 : 0;
 		soak += augmented_attributes.body;
 
+		if (data.augmentations.includes('Troll Dermal Deposits'))
+		{
+			soak++;
+		}
+
 		if (data.armor.includes('Full body armor'))
 		{
 			var armor = 'Full Body Armor (15)';
@@ -2054,7 +2065,7 @@ var render = {
 				{
 					default:
 					case 1:
-						complex_gear.push('Shiawase Cyber-5 cyberdeck (DR 5, Atts 8 7 6 5, Programs 5)');
+						complex_gear.push('Erika MCD-1 cyberdeck (DR 1, Atts 4 3 2 1, Programs 1)');
 						break;
 
 					case 2:
@@ -2062,7 +2073,7 @@ var render = {
 						break;
 
 					case 5:
-						complex_gear.push('Erika MCD-1 cyberdeck (DR 1, Atts 4 3 2 1, Programs 1)');
+						complex_gear.push('Shiawase Cyber-5 cyberdeck (DR 5, Atts 8 7 6 5, Programs 5)');
 						break;
 				}
 			}
@@ -2188,7 +2199,11 @@ var render = {
 		// Muscle Augmentation
 		data.augmentations.forEach(function (aug)
 		{
-			switch (aug.name)
+			var name = aug;
+			if (aug.hasOwnProperty('name'))
+				name = aug.name;
+
+			switch (name)
 			{
 				case 'Muscle Augmentation':
 					attr.strength += aug.rating;
@@ -2223,6 +2238,10 @@ var render = {
 				case 'Synaptic Booster':
 					attr.reaction += aug.rating;
 					attr.essence -= aug.rating * 0.5;
+					break;
+
+				case 'Spur':
+					attr.essence -= 0.3;
 					break;
 			}
 		});
