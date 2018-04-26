@@ -73,7 +73,7 @@ var db = {
 
 	get_type_adjustments: function (type, rating)
 	{
-		res = {
+		var res = {
 			attributes: {body: 0, agility: 0, reaction: 0, strength: 0, will: 0, logic: 0, intuition: 0, charisma: 0},
 			skills: {},
 			knowledge_skills: {},
@@ -211,6 +211,7 @@ var db = {
 					rating: 2,
 					augments: ['Flare Compensation', 'Image link', 'Smartlink', 'Thermographic vision']
 				});
+
 				if (rating > 2)
 				{
 					res.augmentations.push({
@@ -260,6 +261,7 @@ var db = {
 					ammo: 'APDS'
 				});
 				res.commlink = rating - 1;
+
 				if (rating > 0)
 				{
 					res.augmentations.push({
@@ -299,7 +301,7 @@ var db = {
 	// Adjustments if a standard LT, or mage, or decker, etc
 	get_special_adjustments: function (special_type, base_type, rating)
 	{
-		res = {
+		var res = {
 			professional_description: '',
 			attributes: {body: 0, agility: 0, reaction: 0, strength: 0, will: 0, logic: 0, intuition: 0, charisma: 0},
 			skills: {},
@@ -413,11 +415,6 @@ var db = {
 					res.attributes.will = 1;
 					res.skills['Heavy Weapons'] = 3 + rating;
 					res.skills.Demolitions = rating;
-					res.weapons.push({
-						name: 'Microgrenades',
-						add_to: 'Ares Alpha',
-						type: 'Stun (3), High Explosive (3)'
-					});
 					break;
 
 				case 'specops':
@@ -446,6 +443,7 @@ var db = {
 		{
 			// What kind of adept?
 			var improved_skill, bonus_weapon;
+
 			switch (base_type)
 			{
 				default:
@@ -460,7 +458,7 @@ var db = {
 					improved_skill = 'Longarms';
 					bonus_weapon = 'Enfield AS-7';
 					break;
-
+					
 				case 'corpsec':
 					improved_skill = 'Automatics';
 					bonus_weapon = 'FN HAR';
@@ -523,6 +521,7 @@ var db = {
 
 			// Specials : Spells
 			res.special.Magic = 2 + rating;
+
 			if (res.special.Magic > 6)
 			{
 				res.special.Initiate = res.special.Magic - 6;
@@ -530,6 +529,7 @@ var db = {
 			}
 
 			res.special.powers = [];
+
 			switch (rating)
 			{
 				default:
@@ -553,6 +553,7 @@ var db = {
 						}
 					);
 					break;
+
 				case 2:
 					res.special.powers.push(
 						{
@@ -571,6 +572,7 @@ var db = {
 						}
 					);
 					break;
+
 				case 3:
 					res.special.powers.push(
 						{
@@ -589,6 +591,7 @@ var db = {
 						}
 					);
 					break;
+
 				case 4:
 					res.special.powers.push(
 						{
@@ -607,6 +610,7 @@ var db = {
 						}
 					);
 					break;
+
 				case 5:
 					res.special.powers.push(
 						{
@@ -625,6 +629,7 @@ var db = {
 						}
 					);
 					break;
+
 				case 6:
 					res.special.powers.push(
 						{
@@ -704,7 +709,6 @@ var db = {
 					res.special.spells.push('Detect Life');
 				case 1:
 					res.special.spells.push('Physical Barrier');
-
 				default:
 					break;
 			}
@@ -1165,15 +1169,14 @@ var roll = {
 			glitch: false,
 			crit_glitch: false
 		};
+
 		var rolls = [];
 
 		for (i = count; i > 0; i--)
 		{
 			v = this.dval(6);
 			rolls.push(v);
-
 			hits += (v >= 5) ? 1 : 0;
-
 			if (v === 6 && options.pre_edge)
 			{
 				e = this.d(1, {pre_edge: true});
@@ -1183,11 +1186,14 @@ var roll = {
 		}
 
 		res.hits = hits;
+
 		res.rolls = rolls.sort(function (a, b)
 		{
 			return a - b;
 		});
+
 		res.misses = rolls.filter(function (i) {return i === 1}).length;
+
 		if (res.misses >= Math.ceil(count / 2))
 		{
 			if (hits === 0)
@@ -1209,7 +1215,6 @@ var roll = {
 		{
 			return Math.floor(pool / 2);
 		}
-
 		return Math.ceil(pool / 2);
 	},
 
@@ -1219,7 +1224,6 @@ var roll = {
 		{
 			case 1:
 				return this.random_mental_attribute();
-
 			default:
 				return this.random_physical_attribute();
 		}
@@ -1231,13 +1235,10 @@ var roll = {
 		{
 			case 1:
 				return 'will';
-
 			case 2:
 				return 'logic';
-
 			case 3:
 				return 'intuition';
-
 			default:
 				return 'charisma';
 		}
@@ -1249,13 +1250,10 @@ var roll = {
 		{
 			case 1:
 				return 'body';
-
 			case 2:
 				return 'agility';
-
 			case 3:
 				return 'reaction';
-
 			default:
 				return 'strength';
 		}
@@ -1264,7 +1262,6 @@ var roll = {
 
 var gen = {
 	type_options: ['civilian', 'thug', 'ganger', 'corpsec', 'police', 'cultist', 'htr', 'specops', 'mob'],
-
 	_merge_adjustments: function(base, adjust)
 	{
 		var i;
@@ -1320,6 +1317,7 @@ var gen = {
 					base.qualities.positive.push(item);
 				}
 			});
+
 			adjust.qualities.negative.forEach(function (item) {
 				if (typeof item === 'object' || !base.qualities.negative.includes(item))
 				{
@@ -1371,7 +1369,6 @@ var gen = {
 		if (adjust.hasOwnProperty('special'))
 		{
 			base.special = $.extend({}, base.special, adjust.special);
-
 			// If we have a magic rating, remove any augmentations
 			if (adjust.special.hasOwnProperty('Magic'))
 			{
@@ -1421,6 +1418,7 @@ var gen = {
 
 		// If we want to include one of the specials, but haven't set which one, choose one at random
 		var mook_count = options.size;
+
 		if (options.include_special)
 		{
 			mook_count = options.size = 1;
@@ -1428,20 +1426,18 @@ var gen = {
 			if (!options.include_lt && !options.include_adept && !options.include_mage && !options.include_decker)
 			{
 				var i = roll.dval(10);
+
 				switch (true)
 				{
 					case (i < 6):
 						options.include_lt = true;
 						break;
-
 					case (i < 8):
 						options.include_decker = true;
 						break;
-
 					case (i < 10):
 						options.include_adept = true;
 						break;
-
 					default:
 						options.include_mage = true;
 						break;
@@ -1559,9 +1555,11 @@ var gen = {
 		{
 			options.professional_rating = roll.dval(5) - 1;
 		}
+
 		mook.professional_rating = options.professional_rating;
 
 		var rating_baseline = db.get_base_attributes(options.professional_rating);
+
 		this._merge_adjustments(mook, rating_baseline);
 
 		// If we don't have a race, generate one
@@ -1569,10 +1567,11 @@ var gen = {
 		{
 			options.race = db.gen_race();
 		}
-		mook.race = options.race;
 
+		mook.race = options.race;
 		// Get the attribute adjustments from race and apply them
 		var racial_baseline = db.get_metatype_adjustment(options.race);
+
 		this._merge_adjustments(mook, racial_baseline);
 
 		// If we don't have a professional type and we aren't a contact, then generate one
@@ -1593,35 +1592,27 @@ var gen = {
 				case 'civilian':
 					mook.professional_description = 'Civilian';
 					break;
-
 				case 'thug':
 					mook.professional_description = 'Thug';
 					break;
-
 				case 'ganger':
 					mook.professional_description = 'Gang Member';
 					break;
-
 				case 'corpsec':
 					mook.professional_description = 'Corporate Security';
 					break;
-
 				case 'police':
 					mook.professional_description = 'Law Enforcement';
 					break;
-
 				case 'cultist':
 					mook.professional_description = 'Cultist';
 					break;
-
 				case 'htr':
 					mook.professional_description = 'High Threat Response';
 					break;
-
 				case 'specops':
 					mook.professional_description = 'Special Operations';
 					break;
-
 				case 'mob':
 					mook.professional_description = 'Organized Crime';
 					break;
@@ -1642,24 +1633,28 @@ var gen = {
 
 		// Is this a special type? [LT, adept, mage, decker]
 		var adjustments;
+
 		if (options.is_lt)
 		{
 			adjustments = db.get_special_adjustments('LT', options.professional_type, options.professional_rating);
 			this._merge_adjustments(mook, adjustments);
 			mook.special.is_lt = true;
 		}
+
 		if (options.is_decker)
 		{
 			adjustments = db.get_special_adjustments('Decker', options.professional_type, options.professional_rating);
 			this._merge_adjustments(mook, adjustments);
 			mook.special.is_decker = true;
 		}
+
 		if (options.is_adept)
 		{
 			adjustments = db.get_special_adjustments('Adept', options.professional_type, options.professional_rating);
 			this._merge_adjustments(mook, adjustments);
 			mook.special.is_adept = true;
 		}
+
 		if (options.is_mage)
 		{
 			adjustments = db.get_special_adjustments('Mage', options.professional_type, options.professional_rating);
@@ -1682,23 +1677,53 @@ var render = {
 		}
 
 		options = $.extend({}, {
-			mode: 'display_npc'
+			mode: 'display'
 		}, options);
 
-		var i;
-
-		/*
-		Mode options:
-		-	display_npc: just see a cheatsheet of the NPC
-		-	edit_npc: change values
-		-	display_contact: see the full contact information
-		*/
-
-		// Given a target, nuke all contents and make a pretty rendering attached to the target
-		// will need to calculate augmented attributes, limits, and damage resistance pool
 		console.log('render.mook()', data);
 
-		var $mook = render.get_template('render__display_npc');
+		switch (options.mode)
+		{
+			default:
+			case 'display':
+				this.mook_for_view($target, data, options);
+				break;
+			case 'action':
+				this.mook_for_action($target, data, options);
+				break;
+			case 'edit':
+				this.mook_for_edit($target, data, options);
+				break;
+			case 'print':
+				this.mook_for_print($target, data, options);
+				break;
+		}
+	},
+
+	mook_for_print: function($target, data, options)
+	{
+		// TODO for now, just use the existing one
+		this.mook_for_view($target, data, options);
+	},
+
+	mook_for_edit: function($target, data, options)
+	{
+		// TODO for now, just use the existing one
+		this.mook_for_view($target, data, options);
+	},
+
+	mook_for_action: function($target, data, options)
+	{
+		// TODO for now, just use the existing one
+		this.mook_for_view($target, data, options);
+	},
+
+	mook_for_view: function($target, data, options)
+	{
+		// Given a target, nuke all contents and make a pretty rendering attached to the target
+		// will need to calculate augmented attributes, limits, and damage resistance pool
+		var i, $mook = render.get_template('render__display_npc');
+
 		$target.empty().append($mook);
 
 		// Fill in the name
@@ -1721,6 +1746,7 @@ var render = {
 		// Base Attributes
 		var augmented_attributes = this.calc_augmented_attributes(data);
 		var base_attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma'];
+
 		base_attributes.forEach(function (i)
 		{
 			var a = data.attributes[i];
@@ -1758,16 +1784,21 @@ var render = {
 
 		// Initiative
 		var initiative = this.calc_initiative(data, augmented_attributes);
+
 		var init_display = initiative.base + ' ';
+
 		if (initiative.base !== initiative.base_augmented)
 		{
 			init_display += '(' + initiative.base_augmented + ') ';
 		}
+
 		init_display += '+ ' + initiative.dice + 'D6';
+
 		if (initiative.base !== initiative.base_augmented)
 		{
 			init_display += ' (' + initiative.dice_augmented + 'D6)';
 		}
+
 		$mook.find('.information .initiative .value').html(init_display);
 
 		if (data.special.is_decker === true)
@@ -1792,10 +1823,12 @@ var render = {
 
 		// Condition Monitor
 		var cm = data.attributes.body > data.attributes.will ? data.attributes.body : data.attributes.will;
+
 		$mook.find('.information .condition_monitor .value').html(8 + roll.half(cm));
 
 		// Limits
 		var limits = this.calc_limits(data.attributes, augmented_attributes);
+
 		var limit_display = '';
 
 		if (limits.physical === limits.physical_aug)
@@ -1836,19 +1869,40 @@ var render = {
 		}
 
 		// Skills
-		var skills = [];
-		// TODO need to add logic for PhysAds who have Improved Ability
+		var skills = [], improved_skills = [], improved_rating = 0;
+		// TODO This only really accounts for 1 improved ability, but that's all that is generated right now
+
+		if (data.special.is_adept === true)
+		{
+			for (i in data.special.powers)
+			{
+				var improved_power = data.special.powers[i];
+
+				if (improved_power.name === 'Improved Ability')
+				{
+					improved_skills.push(improved_power.ability);
+
+					improved_rating = improved_rating < improved_power.rating ? improved_power.rating : improved_rating;
+				}
+			}
+		}
+
 		for (var skill in data.skills)
 		{
+			if (improved_skills.includes(skill))
+				skills.push(skill + ' ' + data.skills[skill] + ' (' + (data.skills[skill] + improved_rating) + ')');
+
 			if (data.skills[skill] > 0)
 				skills.push(skill + ' ' + data.skills[skill]);
 		}
+
 		$mook.find('.information .skills .value').html(skills.join(', '));
 
 		// Augmentations
 		if (data.augmentations.length)
 		{
 			var augments = [], augment, aug;
+
 			for (i in data.augmentations)
 			{
 				aug = data.augmentations[i];
@@ -1879,6 +1933,7 @@ var render = {
 
 				augments.push(augment);
 			}
+
 			$mook.find('.information .augments .value').html(augments.join(', '));
 		}
 		else
@@ -1889,6 +1944,7 @@ var render = {
 		// Armor & Damage Resistance
 		// The PQ Toughness grants 1 bonus soak die
 		var soak = (data.qualities.positive.includes('Toughness')) ? 1 : 0;
+
 		soak += augmented_attributes.body;
 
 		if (data.augmentations.includes('Troll Dermal Deposits'))
@@ -1899,6 +1955,7 @@ var render = {
 		if (data.armor.includes('Full body armor'))
 		{
 			var armor = 'Full Body Armor (15)';
+
 			soak += 15;
 
 			if (data.armor.includes('Full helmet'))
@@ -1966,6 +2023,7 @@ var render = {
 		for (i in melee)
 		{
 			entry = melee[i];
+
 			entry_text = [entry.ability];
 
 			if (entry.hasOwnProperty('force'))
@@ -1993,6 +2051,7 @@ var render = {
 		if (data.augmentations.includes('Spur'))
 		{
 			entry = db.get_weapon_attributes({name: 'Spur'});
+
 			entry_text = [entry.ability];
 
 			if (entry.hasOwnProperty('force'))
@@ -2019,6 +2078,7 @@ var render = {
 		for (i in ranged)
 		{
 			entry = ranged[i];
+
 			entry_text = [entry.type];
 
 			if (entry.acc_modified !== '')
@@ -2051,6 +2111,7 @@ var render = {
 
 		// Gear
 		var simple_gear = [], complex_gear = [];
+
 		for (i in data.gear)
 		{
 			if (typeof data.gear[i] === 'string')
@@ -2067,11 +2128,9 @@ var render = {
 					case 1:
 						complex_gear.push('Erika MCD-1 cyberdeck (DR 1, Atts 4 3 2 1, Programs 1)');
 						break;
-
 					case 2:
 						complex_gear.push('Hermes Chariot cyberdeck (DR 2, Atts 5 4 3 2, Programs 2)');
 						break;
-
 					case 5:
 						complex_gear.push('Shiawase Cyber-5 cyberdeck (DR 5, Atts 8 7 6 5, Programs 5)');
 						break;
@@ -2096,34 +2155,33 @@ var render = {
 
 		// Commlink
 		var commlink = '';
+
 		switch (data.commlink)
 		{
 			default:
 			case 1:
 				commlink = 'Meta Link';
 				break;
-
 			case 2:
 				commlink = 'Sony Emperor';
 				break;
-
 			case 3:
 				commlink = 'Renraku Sensei';
 				break;
-
 			case 4:
 				commlink = 'Erika Elite';
 				break;
-
 			case 5:
 				commlink = 'Hermes Ikon';
 				break;
-
 			case 6:
 				commlink = 'Transys Avalon';
 		}
+
 		commlink += ' commlink (DR ' + data.commlink + ')';
+
 		commlink = '<div>' + commlink + '</div>';
+
 		gear.push(commlink);
 
 		$mook.find('.information .gear .value').html(gear.join(''));
@@ -2194,12 +2252,14 @@ var render = {
 	calc_augmented_attributes: function(data)
 	{
 		var attr = $.extend({}, data.attributes);
+
 		attr.essence = 6;
 
 		// Muscle Augmentation
 		data.augmentations.forEach(function (aug)
 		{
 			var name = aug;
+
 			if (aug.hasOwnProperty('name'))
 				name = aug.name;
 
@@ -2289,8 +2349,11 @@ var render = {
 	calc_initiative: function (data, augmented_attributes, mode)
 	{
 		var base = data.attributes.reaction + data.attributes.intuition;
+
 		var base_aug = augmented_attributes.reaction + augmented_attributes.intuition;
+
 		var dice = 1;
+
 		var dice_aug = 1;
 
 		if (mode === 'astral')
@@ -2384,17 +2447,303 @@ var render = {
 	}
 };
 
+var storage = {
+	initialize_storage: function()
+	{
+		// Set up any expected things in localStorage
+		localStorage.build_id = build_id;
+
+		// // Cast of Shadows
+		// What tab ID were we last snowing?
+		localStorage.cast_tab_id = null;
+
+		// What character ID did we last create?
+		localStorage.cast_character_id = 1;
+
+		// What tab did we show last?
+		localStorage.cast_current_tab = null;
+
+		// What tabs are there?
+		localStorage.cast_tabs = JSON.stringify([
+			{
+				tab_id: 1,
+				name: 'Full Cast',
+				order: 1,
+				characters: [] // This is an array of {character_id, order} objects
+			}
+		]);
+
+		localStorage.cast_characters = JSON.stringify([]);
+
+		localStorage.cast_character_template = JSON.stringify({
+			character_id: null,
+			type: '',
+			data: null
+		});
+	},
+
+	// Return an array of tabs with their name, tab ID, and display ordering
+	get_tabs: function()
+	{
+		var stored_tabs = JSON.parse(localStorage.cast_tabs);
+
+		stored_tabs.forEach(function(tab)
+		{
+			tab.href = tab.name.replace(/( )/g, '_').replace(/\W/g, '');
+		});
+
+		stored_tabs.sort(function (a, b)
+		{
+			return a.order - b.order;
+		});
+
+		return stored_tabs;
+	},
+
+	// Return the currently displayed tab ID
+	get_current_tab: function()
+	{
+	},
+
+	// Get information about a tab
+	get_tab: function(tab_id)
+	{
+	},
+
+	// Update a given tab, also for adding a new tab
+	set_tab: function(tab_id, name, order)
+	{
+		// If the order isn't the same as the existing tabs, update other tabs to match?
+		var stored_tabs = JSON.parse(localStorage.cast_tabs);
+
+		var lower_order, upper_order, change_direction = false;
+
+		stored_tabs.forEach(function(tab)
+		{
+			if (tab_id === tab.tab_id)
+			{
+				if (name !== null && name !== tab.name)
+				{
+					tab.name = name;
+				}
+
+				if (Number.isInteger(order) && order !== tab.order)
+				{
+					upper_order = Math.max(tab.order, order);
+					lower_order = Math.min(tab.order, order);
+					change_direction = (tab.order > order) ? 1 : -1;
+					tab.order = order;
+				}
+			}
+		});
+
+		if (change_direction !== false)
+		{
+			stored_tabs.forEach(function(tab)
+			{
+				if (tab_id !== tab.tab_id && tab.order >= lower_order && tab.order <= upper_order)
+				{
+					tab.order += change_direction;
+				}
+			});
+		}
+
+		localStorage.cast_tabs = JSON.stringify(stored_tabs);
+	},
+
+	// Delete a given tab from storage
+	delete_tab: function(tab_id)
+	{
+		if (tab_id === 1)
+			return;
+
+		var stored_tabs = JSON.parse(localStorage.cast_tabs), new_tabs = [];
+
+		stored_tabs.forEach(function(tab)
+		{
+			if (tab.tab_id !== tab_id)
+				new_tabs.push(tab);
+		});
+
+		localStorage.cast_tabs = JSON.stringify(new_tabs);
+	},
+
+	generate_character_id: function()
+	{
+	},
+
+	// Return the ID of the newly created tab
+	create_tab: function(tab_name)
+	{
+		// Find the highest tab ID now
+		var tab_id = 1, sort_order, stored_tabs = JSON.parse(localStorage.cast_tabs);
+
+		sort_order = stored_tabs.length + 1;
+
+		stored_tabs.forEach(function(tab)
+		{
+			tab_id = Math.max(tab_id, tab.tab_id);
+		});
+
+		tab_id++;
+
+		stored_tabs.push({
+			tab_id: tab_id,
+			name: tab_name,
+			order: sort_order,
+			characters: []
+		});
+
+		localStorage.cast_tabs = JSON.stringify(stored_tabs);
+
+		return tab_id;
+	}
+};
+
 function view_cast()
 {
 	var $container = $('.main_content').empty();
 
-	$container.html('View the current cast of shadows');
+	var $template = render.get_template('cast_of_shadows');
+
+	var tabs_added = 0;
+
+	$container.append($template);
+
+	var tabs = storage.get_tabs();
+
+	console.log('tabs', tabs);
+
+	tabs.forEach(function(tab)
+	{
+		tabs_added++;
+
+		var $href = $('<a>' + tab.name + '</a>').attr('href', '#' + tab.href);
+
+		var $li = $('<li/>').append($href);
+
+		$template.find('ul.cast_tabs').append($li);
+
+		var $div = $('<div/>', {id: tab.href}).appendTo($template.find('.cast_of_shadows'));
+
+		// TODO Need to add all the character IDs to the tab so they can be filled out too
+		$div.addClass('cast_tab').prop('characters', tab.characters);
+
+		// TODO Need a section to let you copy in characters from the main tab
+		$div.append($("<div/>").html(tab.name)).append("TODO Add a way to copy in cast members");
+
+		// Add a row for editing this tab to the introduction edit area
+		var $row_template = render.get_template('edit_tab_row');
+
+		$row_template.appendTo($template.find('.edit_tab_wrapper'));
+
+		$row_template.find('#tab_name').val(tab.name);
+
+		// Check will save the name
+		$row_template.find('button.tab_edit').button();
+
+		$row_template.find('button.tab_edit').click(function ()
+		{
+			console.log('edit tab name', tab.tab_id, $row_template.find('#tab_name').val());
+
+			var tab_name = $row_template.find('#tab_name').val().replace(/\W/g, '');
+
+			if (tab.name !== tab_name && tab_name !== '')
+			{
+				storage.set_tab(tab.tab_id, tab_name);
+				view_cast();
+			}
+		});
+
+		// Up arrow moves tab up
+		$row_template.find('button.tab_up').button();
+
+		if (tabs_added > 1)
+		{
+			$row_template.find('button.tab_up').click(function ()
+			{
+				console.log('move tab up', tab.tab_id);
+				storage.set_tab(tab.tab_id, null, (tab.order - 1));
+				view_cast();
+			});
+		}
+		else
+		{
+			$row_template.find('button.tab_up').button('disable');
+		}
+
+		// Down moves down
+		$row_template.find('button.tab_down').button();
+
+		if (tabs_added < tabs.length)
+		{
+			$row_template.find('button.tab_down').click(function ()
+			{
+				console.log('move tab down', tab.tab_id);
+				storage.set_tab(tab.tab_id, null, (tab.order + 1));
+				view_cast();
+			});
+		}
+		else
+		{
+			$row_template.find('button.tab_down').button('disable');
+		}
+
+		// Don't allow the main tab to be deleted
+		$row_template.find('button.delete_tab').button();
+
+		if (tab.tab_id !== 1)
+		{
+			$row_template.find('button.delete_tab').click(function ()
+			{
+				console.log('delete tab', tab.tab_id);
+				storage.delete_tab(tab.tab_id);
+				view_cast();
+			});
+		}
+		else
+		{
+			$row_template.find('button.delete_tab').button('disable');
+		}
+	});
+
+	$template.tabs();
+
+	// Be able to add a tab
+	$template.find('button.add_tab').button().click(function()
+	{
+		var tab_name = $('.cast_of_shadows #add_tab_name').val();
+
+		if (tab_name === '')
+		{
+			console.log('blank');
+			return;
+		}
+
+		console.log('create tab!');
+
+		storage.create_tab(tab_name);
+
+		view_cast();
+	});
+
+	/*
+	Get the list of tabs from a function
+	-    function should also convert all strings into href-able strings
+	for each tab
+	-    add an li+href to the ul.cast_tabs
+	-    append a div#id to div.cast_of_shadows
+	TODO add the content that lets you edit tabs too.
+	 */
 }
 
 function view_generator()
 {
 	var $container = $('.main_content').empty();
+
 	var $template = render.get_template('minion_generator_section');
+
+	var current_npc;
 
 	$container.append($template);
 
@@ -2414,6 +2763,7 @@ function view_generator()
 		$('.main_content #minion_generator select').each(function ()
 		{
 			var option = $(this).attr('name');
+
 			var value = $(this).find(':selected').val();
 
 			if (option === 'is_special')
@@ -2444,15 +2794,34 @@ function view_generator()
 			}
 		});
 
-		var npc = gen.mook(options);
+		current_npc = gen.mook(options);
 
-		render.mook($template.find('#generated_results'), npc);
+		render.mook($template.find('#generated_results'), current_npc);
+
+		$template.find('#discard_minion').button('enable');
+
+		$template.find('#add_to_cast').button('enable');
 	});
 
-	// TODO I want to add 2 more buttons here. One to add a generated mook to the cast of shadows, and another to discard.
-	// Discard is the simpler option, as it merely clears the results pane
-	// I could also add a reset button to the first form directly to the left of the 'Generate NPC' button to reset the form.
+	$template.find('#discard_minion').button('disable').click(function ()
+	{
+		$template.find('#generated_results').empty();
 
+		$template.find('#discard_minion').button('disable');
+
+		$template.find('#add_to_cast').button('disable');
+	});
+
+	$template.find('#add_to_cast').button('disable').click(function ()
+	{
+		// $template.find('#generated_results').empty();
+		// $template.find('#discard_minion').button('disable');
+		// $template.find('#add_to_cast').button('disable');
+	});
+
+	// TODO add a reset button to the form to reset all the values to default. Could just call view_generator()
+
+	// TODO want a button that adds the generated mook to the cast as well as a specified tab
 	render.equalize_widths($template.find('.section_tabs #minion_generator .input_row label[equalize]'));
 }
 
@@ -2473,15 +2842,17 @@ function view_run()
 function view_settings()
 {
 	var $container = $('.main_content').empty();
+
 	var $template = render.get_template('settings');
 
 	$container.append($template);
 
-	$template.find('button').button();
+	$container.find('button').button();
 
 	// Need to give it a hard-coded ID only after the template is cloned
-	$template.find('.delete_localstorage_dialog').attr('id', 'delete_localstorage_dialog');
-	$('#delete_localstorage_dialog').dialog({
+	$container.find('.delete_localstorage_dialog').attr('id', 'delete_localstorage_dialog');
+
+	$container.find('#delete_localstorage_dialog').dialog({
 		autoOpen: false,
 		modal: true,
 		title: 'Frag the World!',
@@ -2491,6 +2862,7 @@ function view_settings()
 				text: "Ok",
 				click: function() {
 					localStorage.clear();
+					storage.initialize_storage();
 					$( this ).dialog( "close" );
 				}
 			},
@@ -2503,7 +2875,7 @@ function view_settings()
 		]
 	});
 
-	$template.find('#delete_localstorage').on('click', function ()
+	$container.find('#delete_localstorage').on('click', function ()
 	{
 		$('#delete_localstorage_dialog').dialog("open");
 	});
@@ -2511,10 +2883,11 @@ function view_settings()
 
 function view_intro()
 {
-	$('.main_content').empty();
+	var $container = $('.main_content').empty();
+
 	var template = render.get_template('main_screen');
 
-	$('.main_content').append(template);
+	$container.append(template);
 }
 
 function setup_controls()
@@ -2523,21 +2896,26 @@ function setup_controls()
 
 	// Set up the roll controls in the top bar
 	$('.top_bar button').button();
+
 	$('.top_bar .numbers button').addClass('smaller_button');
+
 	$('.top_bar .numbers button').on('click', function ()
 	{
 		var dice = $(this).attr('roll'), options = {}, addition = '\n';
 
 		var timestamp = new Date();
+
 		addition += timestamp.toLocaleTimeString() + '; pool of ' + dice + '\n';
 
 		if ($('.top_bar_roller #explode').is(':checked'))
 		{
 			options.pre_edge = true;
 		}
+
 		var results = roll.d(dice, options);
 
 		addition += results.rolls.join(', ') + '\n' + results.hits;
+
 		addition += (results.hits === 1) ? ' hit' : ' hits';
 
 		// Our roller marks it as either a glitch or a critical glitch, not both
@@ -2554,16 +2932,20 @@ function setup_controls()
 	});
 
 	var results_text = '';
+
 	$('textarea#roll_results').html(results_text);
+
 	function update_results_text(text)
 	{
 		results_text = results_text + "\n" + text;
+
 		$('textarea#roll_results').html(results_text);
 
 		if ($('textarea#roll_results').length)
 		{
 			$('textarea#roll_results').scrollTop($('textarea#roll_results')[0].scrollHeight - $('textarea#roll_results').height());
 		}
+
 		$('.top_bar .numbers button').blur();
 	}
 
@@ -2571,12 +2953,67 @@ function setup_controls()
 	$('.menu button').button();
 
 	$('.menu .cast').on('click', view_cast);
+
 	$('.menu .minion').on('click', view_generator);
-	$('.menu .contact').on('click', view_contact);
-	$('.menu .run').on('click', view_run);
+
+	$('.menu .contact').on('click', view_contact).hide(); // TODO Hidden until I have it working
+
+	$('.menu .run').on('click', view_run).hide(); // TODO Hidden until I have it working
+
 	$('.menu .settings').on('click', view_settings);
 
 	$('.top_bar .title').on('click', view_intro);
 
+	$('.top_bar .version').text('Version - ' + build_id);
+
 	view_intro();
+
+	// Initialization checks
+	if (!localStorage)
+	{
+		// TODO prettyify
+		alert('Your browser is too old to run this utility. Please upgrade.');
+	}
+
+	var $build_mismatch_dialog = $('.build_mismatch_nuke_storage').dialog({
+		autoOpen: false,
+		modal: true,
+		title: 'Fatal Version Mismatch',
+		width: 500,
+		buttons: [
+			{
+				text: "Ok",
+				click: function() {
+					localStorage.clear();
+					storage.initialize_storage();
+					$( this ).dialog( "close" );
+				}
+			},
+			{
+				text: "Cancel",
+				click: function() {
+					$( this ).dialog( "close" );
+				}
+			}
+		]
+	});
+
+	if (localStorage.build_id && localStorage.build_id !== build_id)
+	{
+		$build_mismatch_dialog.find('[software_version]').html('Version ' + build_id);
+
+		$build_mismatch_dialog.find('[stored_version]').html('Version ' + localStorage.build_id);
+
+		// TODO make this link actually work and point to the 'right' place.
+		$build_mismatch_dialog.find('[link]').html($('<a/>').attr('href', download_url).text(download_url));
+
+		// TODO remove this line when the above is done
+		$build_mismatch_dialog.find('[link]').detach();
+
+		$('.build_mismatch_nuke_storage').dialog('open');
+	}
 }
+
+var build_id = '0.3a';
+
+var download_url = 'http://google.com';

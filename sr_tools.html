@@ -18,6 +18,7 @@
 <body>
 <div class="top_bar">
 	<div class="title">Shadowrun GM Tools</div>
+	<div class="version"></div>
 	<div class="top_bar_roller">
 		<div class="numbers">
 			<div class="row">
@@ -95,7 +96,61 @@
 
 
 <div template_holder>
-	<div template="main_screen">Main Screen turn on!</div>
+	<div template="main_screen">
+		Main Screen turn on!
+
+		<div class="build_mismatch_nuke_storage">
+			<p>
+				The software version you are running does not match the stored data's version which will cause issues. Do you want to delete the local stored data and start from scratch?
+			</p>
+			<p>
+				Alternately, look at the stored data version and grab that version of code instead.
+			</p>
+			<ul>
+				<li software_version>a</li>
+				<li stored_version>b</li>
+				<li link>c</li>
+			</ul>
+		</div>
+	</div>
+
+	<div template="cast_of_shadows">
+		<div class="cast_of_shadows">
+			<ul class="cast_tabs">
+				<li><a href="#introduction">Introduction</a></li>
+			</ul>
+			<div id="introduction">
+				<div>Welcome to your cast of shadows! This section needs more filler. It should include notes about how there is a system tab with all characters and you can't delete it.</div>
+
+				<div>You can edit tab names and rearrange them here.</div>
+
+				<div class="spacer_40"></div>
+
+				<div class="edit_tabs">
+					<div class="add_tab_wrapper">
+						<span>Add tab:</span>
+						<input id="add_tab_name"/>
+						<button class="add_tab smaller_button"><span class="ui-icon ui-icon-circle-plus"></span></button>
+					</div>
+
+					<div class="spacer_20"></div>
+
+					<div class="edit_tab_wrapper">
+						<span>Edit tabs:</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div template="edit_tab_row">
+		<span number></span>
+		<input id="tab_name" />
+		<button class="tab_edit smaller_button"><span class="ui-icon ui-icon-check"></span></button>
+		<button class="tab_up smaller_button"><span class="ui-icon ui-icon-arrowthick-1-n"></span></button>
+		<button class="tab_down smaller_button"><span class="ui-icon ui-icon-arrowthick-1-s"></span></button>
+		<button class="delete_tab smaller_button"><span class="ui-icon ui-icon-trash"></span></button>
+	</div>
 
 	<div template="settings">
 		<h2>Settings</h2>
@@ -104,8 +159,14 @@
 			<button id="delete_localstorage">Nuke it from orbit</button>
 		</div>
 
+		<div class="row">
+			<h3>Minion Condition Monitor</h3>
+			<p>Minions, by default, have a combined Condition Monitor based on their BODY and WILL scores. If you want your minions to have separate health tracks for Stun and Physical damage, make that change here.</p>
+			<p>Changes here will reflect on all minions created after this point. Any minions already existing will need to be edited individually.</p>
+		</div>
+
 		<div class="delete_localstorage_dialog">
-			<p>This option cannot be undone. Once you delete everything here, you'll have to start all over again. On the plus side, this is great if you want to make sure no decker finds traces of your activities here.</p>
+			<p>This option cannot be undone. Once you delete everything here, you'll have to start all over again. On the plus side, this is great if you want to make sure no hacker finds traces of your activities here.</p>
 		</div>
 	</div>
 
@@ -194,6 +255,12 @@
 					<button id="generate_minion">Generate NPC</button>
 
 					<div id="generated_results"></div>
+
+					<button id="discard_minion">Discard</button>
+
+					<button id="add_to_cast">Add to Cast</button>
+
+					<span id="add_to_cast_tab"></span>
 				</div>
 			</div>
 			<div id="mob_generator">
@@ -326,17 +393,9 @@
 Here is the current todo list:
 --
 -
-Once I have it console-ing the mobs from UI controls, then go back to the cast section.
-Cast section needs to be tabs of things, blank at first with a message.
-If all tabs are deleted, re-show that message.
-Figure out how to add tabs and make them UI-able
-Figure out how to remove tabs and not break things
-Test refreshing the page, start from scratch.
-Add a "delete all" button.
--
 See about storing mooks in Local Storage, so that a refresh is not a disaster.
 Add in more settings options:
---	alternate condition monitor displays, wound modifiers
+-	alternate condition monitor displays, wound modifiers
 -
 Knock out the Contact Generation portion
 -
@@ -353,9 +412,6 @@ Add versioning to Local Storage. If it doesn't meet the current version, then de
 Lots more detail for Contact generation
 -
 Lots more detail for Run generation
-
-
-
 
 -->
 

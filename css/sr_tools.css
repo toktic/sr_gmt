@@ -80,10 +80,18 @@ body{
 
 .top_bar .title
 {
+	cursor: pointer;
 	font-size: 28px;
 	font-weight: bold;
 	color: #fff;
 	margin-top: 24px;
+	margin-left: 24px;
+}
+
+
+.top_bar .version
+{
+	color: #fff;
 	margin-left: 24px;
 }
 
@@ -292,4 +300,24 @@ div[template_holder]
 	padding: 2px;
 	display: table-cell;
 	vertical-align: top;
+}
+
+.cast_of_shadows
+{
+
+}
+
+.cast_of_shadows .add_tab_wrapper
+{
+
+}
+
+.cast_of_shadows .add_tab_wrapper button
+{
+	vertical-align: bottom;
+}
+
+.cast_of_shadows .edit_tab_wrapper button
+{
+	vertical-align: bottom;
 }
