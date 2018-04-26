@@ -458,7 +458,7 @@ var db = {
 					improved_skill = 'Longarms';
 					bonus_weapon = 'Enfield AS-7';
 					break;
-					
+
 				case 'corpsec':
 					improved_skill = 'Automatics';
 					bonus_weapon = 'FN HAR';
