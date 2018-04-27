@@ -880,7 +880,7 @@ var db = {
 			type: '', // Display type of the weapon: Light Pistol, SMG, etc.
 			ability: '', // Linked ability: Blades, Automatics, etc.
 			acc: '',
-			acc_modified: '', // Modifier to conditionally apply due to smartlink, laser sight, etc.
+			acc_modified: null, // Modifier to conditionally apply due to smartlink, laser sight, etc.
 			dv: '', // Damage Value
 			damage_type: 'P', // Physical, Stun, Stun(electrical)
 			damage_attribute: null, // If damage is linked to STR instead of bullet type
@@ -1142,6 +1142,108 @@ var db = {
 				data.ammo_count = 10;
 				data.reload = 'c';
 				break;
+		}
+
+		return data;
+	},
+
+	get_skill_attributes: function (skill)
+	{
+		var data = {
+			attribute: null,
+			limit: null
+		};
+
+		switch (skill)
+		{
+			// Weapon based skills
+			case 'Automatics':
+			case 'Blades':
+			case 'Clubs':
+			case 'Heavy Weapons':
+			case 'Longarms':
+			case 'Pistols':
+				data.attribute = 'agility';
+				data.limit = 'gear';
+				break;
+
+			// Strength based skills
+			case 'Running':
+			case 'Swimming':
+				data.attribute = 'strength';
+				data.limit = 'physical';
+				break;
+
+			// Agility based skills
+			case 'Gunnery':
+			case 'Gymnastics':
+			case 'Palming':
+			case 'Sneaking':
+			case 'Unarmed Combat':
+			case 'Throwing Weapons':
+				data.attribute = 'agility';
+				data.limit = 'physical';
+				break;
+
+			// Reaction based skills
+			case 'Pilot Ground Craft':
+			case 'Pilot Aircraft':
+				data.attribute = 'reaction';
+				data.limit = 'gear';
+				break;
+
+			// Charisma based social skills
+			case 'Con':
+			case 'Etiquette':
+			case 'Intimidation':
+			case 'Leadership':
+			case 'Negotiation':
+			case 'Impersonation':
+				data.attribute = 'charisma';
+				data.limit = 'social';
+				break;
+
+			// Logic based skills
+			case 'Arcana':
+			case 'Computer':
+			case 'Demolitions':
+			case 'Cybercombat':
+			case 'Electronic Warfare':
+			case 'First Aid':
+			case 'Hacking':
+			case 'Hardware':
+				data.attribute = 'logic';
+				data.limit = 'mental';
+				break;
+
+			// Intuition based mental skills
+			case 'Disguise':
+			case 'Navigation':
+			case 'Perception':
+			case 'Tracking':
+				data.attribute = 'intuition';
+				data.limit = 'mental';
+				break;
+
+			// Willpower based skills
+			case 'Astral Combat':
+				data.attribute = 'willpower';
+				data.limit = 'astral';
+				break;
+
+			// Magic based skills
+			case 'Assessing':
+			case 'Banishing':
+			case 'Binding':
+			case 'Counterspelling':
+			case 'Spellcasting':
+			case 'Summoning':
+				data.attribute = 'magic';
+				data.limit = 'force';
+				break;
+
+			default:
+				console.log('ERROR: get_skill_attributes() with unknown skill', skill);
 		}
 
 		return data;
@@ -1514,6 +1616,10 @@ var gen = {
 			professional_type: options.professional_type
 		};
 
+		// Pull in copies from global settings
+		mook.condition_monitor = storage.setting('condition_monitor');
+		mook.wound_penalty = storage.setting('wound_penalty');
+
 		// If we don't have a gender, assign a binary gender.
 		// Will limiting gender to a binary decision piss off some people? Probably yes.
 		// However, the author is not spending time developing a fully politically correct gender-determination system at this time.
@@ -1680,21 +1786,22 @@ var render = {
 			mode: 'display'
 		}, options);
 
+		// TODO remove
 		console.log('render.mook()', data);
 
 		switch (options.mode)
 		{
 			default:
-			case 'display':
-				this.mook_for_view($target, data, options);
+			case 'display': // Default view, includes icons to convert to action and edit modes
+				this.mook_for_display($target, data, options);
 				break;
-			case 'action':
+			case 'action': // This is similar to display but includes buttons to roll most skills and initiative
 				this.mook_for_action($target, data, options);
 				break;
-			case 'edit':
+			case 'edit': // Lots of dropdowns and widgets to change the NPC
 				this.mook_for_edit($target, data, options);
 				break;
-			case 'print':
+			case 'print': // Strictly for printing to PDF or other non-interactive modes
 				this.mook_for_print($target, data, options);
 				break;
 		}
@@ -1703,22 +1810,807 @@ var render = {
 	mook_for_print: function($target, data, options)
 	{
 		// TODO for now, just use the existing one
-		this.mook_for_view($target, data, options);
+		this.mook_for_display($target, data, options);
 	},
 
 	mook_for_edit: function($target, data, options)
 	{
-		// TODO for now, just use the existing one
-		this.mook_for_view($target, data, options);
+		var i, $mook = render.get_template('render__edit_npc');
+
+		$target.empty().append($mook);
+
+		// Add buttons to enter other modes
+		$mook.find('button').button();
+
+		$mook.find('.controls button.action').click(function()
+		{
+			render.mook_for_action($target, data, options);
+		});
+
+		$mook.find('.controls button.display').click(function()
+		{
+			render.mook_for_display($target, data, options);
+		});
+
+
+
+
+		// TODO this will be looooots of fun. Totally.
+
 	},
 
 	mook_for_action: function($target, data, options)
 	{
-		// TODO for now, just use the existing one
-		this.mook_for_view($target, data, options);
+		var i, $mook = render.get_template('render__action_npc'), wp = {penalty: 0};
+
+		$target.empty().append($mook);
+
+		// Add buttons to enter other modes
+		$mook.find('button').button();
+
+		$mook.find('.controls button.display').click(function()
+		{
+			render.mook_for_display($target, data, options);
+		});
+
+		$mook.find('.controls button.edit').click(function()
+		{
+			render.mook_for_edit($target, data, options);
+		});
+
+		// Fill in the name
+		$mook.find('.npc_name').html(data.name);
+
+		// Fill in the description
+		var description = data.gender + ' ' + data.race + ', Rating ' + data.professional_rating + ' ' + data.professional_description;
+
+		if (data.special.is_lt)
+			description += ' Lieutenant';
+		if (data.special.is_decker)
+			description += ' Decker';
+		if (data.special.is_adept)
+			description += ' Physical Adept';
+		if (data.special.is_mage)
+			description += ' Magician';
+
+		$mook.find('.npc_description').html(description);
+
+		// Base Attributes
+		var augmented_attributes = this.calc_augmented_attributes(data);
+		var base_attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma'];
+
+		base_attributes.forEach(function (i)
+		{
+			var a = data.attributes[i];
+			if (augmented_attributes[i] !== data.attributes[i])
+			{
+				a += ' (' + augmented_attributes[i] + ')';
+			}
+			$mook.find('.attribute_values .attribute_value.' + i).html(a);
+		});
+
+		// Essence
+		// Working around display issues of whole numbers vs repeating numbers
+		if (augmented_attributes.essence % 1 === 0)
+		{
+			$mook.find('.attribute_values .attribute_value.essence').html(augmented_attributes.essence);
+		}
+		else if ((augmented_attributes.essence * 10) % 1 === 0)
+		{
+			$mook.find('.attribute_values .attribute_value.essence').html(augmented_attributes.essence.toFixed(1));
+		}
+		else
+		{
+			$mook.find('.attribute_values .attribute_value.essence').html(augmented_attributes.essence.toFixed(2));
+		}
+
+		// Set/Hide Magic
+		if (data.special.hasOwnProperty('Magic'))
+		{
+			$mook.find('.attribute_values .attribute_value.magic').html(data.special.Magic);
+		}
+		else
+		{
+			$mook.find('.attribute_name.magic, .attribute_value.magic').hide();
+		}
+
+		// Initiative
+		var initiative = this.calc_initiative(data, augmented_attributes);
+
+		var init_display = initiative.base + ' ';
+
+		if (initiative.base !== initiative.base_augmented)
+		{
+			init_display += '(' + initiative.base_augmented + ') ';
+		}
+
+		init_display += '+ ' + initiative.dice + 'D6';
+
+		if (initiative.base !== initiative.base_augmented)
+		{
+			init_display += ' (' + initiative.dice_augmented + 'D6)';
+		}
+
+		$mook.find('.information .initiative .value').html(init_display);
+
+		$mook.find('.information .initiative button').button().click(function ()
+		{
+			var i, total = initiative.base_augmented;
+
+			for (i = initiative.dice_augmented; i> 0; i--)
+			{
+				total += roll.dval(6);
+			}
+
+			$mook.find('.information .initiative .result').html(total + wp.penalty);
+		});
+
+		if (data.special.is_decker === true)
+		{
+			var matrix_initiative = this.calc_initiative(data, augmented_attributes, 'matrix');
+			$mook.find('.information .matrix_initiative .value').html('Data Processing + ' + matrix_initiative.base + ' + ' + matrix_initiative.dice + 'D6');
+
+			$mook.find('.information .matrix_initiative button').button().click(function ()
+			{
+				var i, total = matrix_initiative.base;
+
+				for (i = matrix_initiative.dice; i> 0; i--)
+				{
+					total += roll.dval(6);
+				}
+
+				total += wp.penalty;
+
+				$mook.find('.information .matrix_initiative .result').html(total + " + DP");
+			});
+		}
+		else
+		{
+			$mook.find('.information .matrix_initiative').hide();
+		}
+
+		if (data.special.is_mage === true)
+		{
+			var astral_initiative = this.calc_initiative(data, augmented_attributes, 'astral');
+			$mook.find('.information .astral_initiative .value').html(astral_initiative.base + ' + ' + astral_initiative.dice + 'D6');
+
+			$mook.find('.information .astral_initiative button').button().click(function ()
+			{
+				var i, total = astral_initiative.base;
+
+				for (i = astral_initiative.dice; i> 0; i--)
+				{
+					total += roll.dval(6);
+				}
+
+				$mook.find('.information .astral_initiative .result').html(total + wp.penalty);
+			});
+		}
+		else
+		{
+			$mook.find('.information .astral_initiative').hide();
+		}
+
+		// Condition Monitor
+		$mook.find('.information .condition_monitor').append(render.get_condition_monitor(wp, data));
+
+		// Limits
+		var limits = this.calc_limits(data.attributes, augmented_attributes);
+
+		var limit_display = '';
+
+		if (limits.physical === limits.physical_aug)
+			limit_display += 'Physical ' + limits.physical + ', ';
+		else
+			limit_display += 'Physical ' + limits.physical + ' (' + limits.physical_aug + '), ';
+
+		if (limits.mental === limits.mental_aug)
+			limit_display += 'Mental ' + limits.mental + ', ';
+		else
+			limit_display += 'Mental ' + limits.mental + ' (' + limits.mental_aug + '), ';
+
+		if (limits.social === limits.social_aug)
+			limit_display += 'Social ' + limits.social;
+		else
+			limit_display += 'Social ' + limits.social + ' (' + limits.social_aug + ')';
+
+		$mook.find('.information .limits .value').html(limit_display);
+
+		// Qualities
+		if (data.qualities.positive.length === 0 && data.qualities.negative.length === 0)
+		{
+			$mook.find('.information .qualities').hide();
+		}
+		else
+		{
+			$mook.find('.information .qualities .value').html(data.qualities.positive.concat(data.qualities.negative).join(', '));
+		}
+
+		// Initiate Grade
+		if (data.special.hasOwnProperty('Initiate'))
+		{
+			$mook.find('.information .initiate_grade .value').html(data.special.Initiate);
+		}
+		else
+		{
+			$mook.find('.information .initiate_grade').hide();
+		}
+
+		// Skills
+		var improved_skills = [], improved_rating = 0, $skill, skill, skill_data, skill_limit;
+
+		// TODO This only really accounts for 1 improved ability, but that's all that is generated right now
+		if (data.special.is_adept === true)
+		{
+			for (i in data.special.powers)
+			{
+				var improved_power = data.special.powers[i];
+
+				if (improved_power.name === 'Improved Ability')
+				{
+					improved_skills.push(improved_power.ability);
+
+					improved_rating = improved_rating < improved_power.rating ? improved_power.rating : improved_rating;
+				}
+			}
+		}
+
+		for (skill in data.skills)
+		{
+			if (data.skills[skill] <= 0)
+			{
+				continue;
+			}
+
+			$skill = render.get_template('action_skill').appendTo($mook.find('.information .skills .skill_list'));
+
+			skill_data = db.get_skill_attributes(skill);
+
+			$skill.prop('pool', (data.skills[skill] + augmented_attributes[skill_data.attribute]));
+			$skill.prop('limit', skill_data.limit);
+
+			if (skill_data.limit === 'magic')
+			{
+				$skill.prop('limit', augmented_attributes.magic);
+				skill_limit = augmented_attributes.magic;
+			}
+			else if (skill_data.limit === 'gear')
+			{
+				skill_limit = 'Gear';
+			}
+			else if (limits.hasOwnProperty(skill_data.limit))
+			{
+				$skill.prop('limit', limits[skill_data.limit]);
+				skill_limit = limits[skill_data.limit];
+
+				if (limits.hasOwnProperty(skill_data.limit + '_aug'))
+				{
+					$skill.prop('limit', limits[skill_data.limit + '_aug']);
+					skill_limit = limits[skill_data.limit + '_aug'];
+				}
+			}
+
+			$skill.find('.skill').html(skill + ' ' + data.skills[skill] + ' [' + skill_limit + ']');
+			$skill.prop('skill', skill);
+
+			if (improved_skills.includes(skill))
+			{
+				var improved_skill_rating = data.skills[skill] + improved_rating;
+				$skill.prop('pool', data.skills[skill] + augmented_attributes[skill_data.attribute] + improved_rating);
+				$skill.find('.skill').html(skill + ' ' + data.skills[skill] + ' (' + improved_skill_rating + ') [' + skill_limit + ']');
+			}
+
+			$skill.find('button').button().click(function ()
+			{
+				var $skill = $(this).parent();
+				var d = $skill.prop('pool'), i = roll.d(d), total = i.hits;
+
+				if (wp.penalty !== 0)
+				{
+					if ((d + wp.penalty) <= 0)
+					{
+						$skill.find('.result').html('No pool w/ wounds');
+						return;
+					}
+
+					i = roll.d(d + wp.penalty);
+					total = i.hits;
+				}
+
+				if (total > $skill.prop('limit') && !isNaN($skill.prop('limit')))
+					total = $skill.prop('limit');
+
+				if (i.glitch)
+					total += ', glitch';
+				else if (i.crit_glitch)
+					total += ', CRIT GLITCH';
+
+				$skill.find('.result').html(total);
+			});
+		}
+
+		// Augmentations
+		if (data.augmentations.length)
+		{
+			var augments = [], augment, aug;
+
+			for (i in data.augmentations)
+			{
+				aug = data.augmentations[i];
+
+				if (aug === 'Spur')
+				{
+					augments.push('Retractable Spur');
+					continue;
+				}
+
+				if (typeof aug === 'string')
+				{
+					augments.push(aug);
+					continue;
+				}
+
+				augment = aug.name;
+
+				if (aug.hasOwnProperty('rating'))
+				{
+					augment += ' ' + aug.rating;
+				}
+
+				if (aug.hasOwnProperty('augments'))
+				{
+					augment += ' (' + aug.augments.join(', ') + ')';
+				}
+
+				augments.push(augment);
+			}
+
+			$mook.find('.information .augments .value').html(augments.join(', '));
+		}
+		else
+		{
+			$mook.find('.information .augments').hide();
+		}
+
+		// Armor & Damage Resistance
+		// The PQ Toughness grants 1 bonus soak die
+		var soak = (data.qualities.positive.includes('Toughness')) ? 1 : 0;
+
+		soak += augmented_attributes.body;
+
+		if (data.augmentations.includes('Troll Dermal Deposits'))
+		{
+			soak++;
+		}
+
+		if (data.armor.includes('Full body armor'))
+		{
+			var armor = 'Full Body Armor (15)';
+
+			soak += 15;
+
+			if (data.armor.includes('Full helmet'))
+			{
+				armor += ', Helmet (+3)';
+				soak += 3;
+			}
+
+			if (data.armor.includes('Chemical Seal'))
+			{
+				armor += ' w/ chemical seal';
+			}
+
+			$mook.find('.information .armor .value').html(armor);
+		}
+		else if (data.armor.includes('Armor Jacket'))
+		{
+			$mook.find('.information .armor .value').html('Armor Jacket (12)');
+			soak += 12;
+		}
+		else if (data.armor.includes('Lined Coat'))
+		{
+			$mook.find('.information .armor .value').html('Lined Coat (9)');
+			soak += 9;
+		}
+		else if (data.armor.includes('Armor Vest'))
+		{
+			$mook.find('.information .armor .value').html('Armor Vest (9)');
+			soak += 9;
+		}
+		else
+		{
+			$mook.find('.information .armor').hide();
+		}
+
+		$mook.find('.information .damage_resistance .value').html(soak);
+		$mook.find('.information .damage_resistance button').button().click(function ()
+		{
+			var i = roll.d(soak), total = i.hits;
+
+			$mook.find('.information .damage_resistance .result').html(total);
+		});
+
+		// Weapons & Gear & Commlink
+		var gear = [], melee = [], ranged = [], entry_text, entry, $gear;
+
+		for (i in data.weapons)
+		{
+			// clone object
+			var weapon, weapon_stats;
+
+			if (typeof data.weapons[i] === 'string')
+			{
+				weapon = {
+					name: data.weapons[i]
+				}
+			}
+			else
+			{
+				weapon = $.extend({}, data.weapons[i]);
+			}
+
+			weapon_stats = db.get_weapon_attributes(weapon);
+
+			if (weapon_stats.type === 'Melee')
+				melee.push(weapon_stats);
+			else
+				ranged.push(weapon_stats);
+		}
+
+		for (i in melee)
+		{
+			entry = melee[i];
+
+			entry_text = [entry.ability];
+
+			if (entry.hasOwnProperty('force'))
+				entry_text.push('Force ' + entry.force);
+
+			if (entry.acc_modified !== null)
+				entry_text.push('Acc ' + entry.acc + ' (' + entry.acc_modified + ')');
+			else
+				entry_text.push('Acc ' + entry.acc);
+
+			entry_text.push('Reach ' + entry.reach);
+
+			if (entry.damage_attribute === 'strength')
+				entry_text.push('DV (STR + ' + entry.dv + ')' + entry.damage_type);
+			else
+				entry_text.push('DV ' + entry.dv + entry.damage_type);
+
+			if (entry.ap !== 0)
+				entry_text.push('AP ' + entry.ap);
+
+			$gear = render.get_template('weapon').appendTo($mook.find('.information .gear .value'));
+
+			$gear.find('.stats').html(entry.name + ' [' + entry_text.join(', ') + ']');
+
+			$mook.find('.skill_list > div').each(function ()
+			{
+				if (entry.ability === $(this).prop('skill'))
+					$gear.prop('pool', $(this).prop('pool'));
+			});
+
+			$gear.prop('limit', entry.acc);
+			if (entry.acc_modified !== null)
+				$gear.prop('limit', entry.acc_modified);
+
+			$gear.find('button').button().click(function ()
+			{
+				var $gear = $(this).parent();
+				var d = $gear.prop('pool'), i = roll.d(d), total = i.hits;
+
+				if (wp.penalty !== 0)
+				{
+					if ((d + wp.penalty) <= 0)
+					{
+						$gear.find('.result').html('N/A');
+						return;
+					}
+
+					i = roll.d(d + wp.penalty);
+					total = i.hits;
+				}
+
+				if (total > $gear.prop('limit') && !isNaN($gear.prop('limit')))
+					total = $gear.prop('limit');
+
+				if (i.glitch)
+					total += ',g';
+				else if (i.crit_glitch)
+					total += ',G';
+
+				$gear.find('.result').html(total);
+			});
+		}
+
+		// Cyber-implanted Spur is a special case
+		if (data.augmentations.includes('Spur'))
+		{
+			entry = db.get_weapon_attributes({name: 'Spur'});
+
+			entry_text = [entry.ability];
+
+			if (entry.hasOwnProperty('force'))
+				entry_text.push('Force ' + entry.force);
+
+			if (limits.physical === limits.physical_aug)
+				entry_text.push('Acc ' + limits.physical);
+			else
+				entry_text.push('Acc ' + limits.physical + ' (' + limits.physical_aug + ')');
+
+			entry_text.push('Reach ' + entry.reach);
+
+			if (entry.damage_attribute === 'strength')
+				entry_text.push('DV (STR + ' + entry.dv + ')' + entry.damage_type);
+			else
+				entry_text.push('DV ' + entry.dv + entry.damage_type);
+
+			if (entry.ap !== 0)
+				entry_text.push('AP ' + entry.ap);
+
+			$gear = render.get_template('weapon').appendTo($mook.find('.information .gear .value'));
+
+			$gear.find('.stats').html(entry.name + ' [' + entry_text.join(', ') + ']');
+
+			$mook.find('.skill_list > div').each(function ()
+			{
+				if (entry.ability === $(this).prop('skill'))
+					$gear.prop('pool', $(this).prop('pool'));
+			});
+
+			$gear.prop('limit', entry.acc);
+			if (entry.acc_modified !== null)
+				$gear.prop('limit', entry.acc_modified);
+
+			$gear.find('button').button().click(function ()
+			{
+				var $gear = $(this).parent();
+				var d = $gear.prop('pool'), i = roll.d(d), total = i.hits;
+
+				if (wp.penalty !== 0)
+				{
+					if ((d + wp.penalty) <= 0)
+					{
+						$gear.find('.result').html('N/A');
+						return;
+					}
+
+					i = roll.d(d + wp.penalty);
+					total = i.hits;
+				}
+
+				if (total > $gear.prop('limit') && !isNaN($gear.prop('limit')))
+					total = $gear.prop('limit');
+
+				if (i.glitch)
+					total += ',g';
+				else if (i.crit_glitch)
+					total += ',G';
+
+				$gear.find('.result').html(total);
+			});
+		}
+
+		for (i in ranged)
+		{
+			entry = ranged[i];
+
+			entry_text = [entry.type];
+
+			if (entry.acc_modified !== null)
+				entry_text.push('Acc ' + entry.acc + ' (' + entry.acc_modified + ')');
+			else
+				entry_text.push('Acc ' + entry.acc);
+
+			if (entry.damage_attribute === 'strength')
+				entry_text.push('DV (STR + ' + entry.dv + ')' + entry.damage_type);
+			else
+				entry_text.push('DV ' + entry.dv + entry.damage_type);
+
+			if (entry.ap !== 0)
+				entry_text.push('AP ' + entry.ap);
+
+			entry_text.push(entry.modes);
+
+			if (entry.rc < entry.rc_modified)
+				entry_text.push('RC ' + entry.rc + ' (' + entry.rc_modified + ')');
+			else
+				entry_text.push('RC ' + entry.dv);
+
+			entry_text.push(entry.ammo_count + '(' + entry.reload + ')');
+
+			if (entry.ammo_type !== '')
+				entry_text.push('w/' + entry.ammo_type + ' ammo');
+
+			// gear.push('<div>' + entry.name + ' [' + entry_text.join(', ') + ']</div>');
+			$gear = render.get_template('weapon').appendTo($mook.find('.information .gear .value'));
+
+			$gear.find('.stats').html(entry.name + ' [' + entry_text.join(', ') + ']');
+
+			$mook.find('.skill_list > div').each(function ()
+			{
+				if (entry.ability === $(this).prop('skill'))
+					$gear.prop('pool', $(this).prop('pool'));
+			});
+
+			$gear.prop('limit', entry.acc);
+			if (entry.acc_modified !== null)
+				$gear.prop('limit', entry.acc_modified);
+
+			$gear.find('button').button().click(function ()
+			{
+				var $gear = $(this).parent();
+				var d = $gear.prop('pool'), i = roll.d(d), total = i.hits;
+
+				if (wp.penalty !== 0)
+				{
+					if ((d + wp.penalty) <= 0)
+					{
+						$gear.find('.result').html('N/A');
+						return;
+					}
+
+					i = roll.d(d + wp.penalty);
+					total = i.hits;
+				}
+
+				if (total > $gear.prop('limit') && !isNaN($gear.prop('limit')))
+					total = $gear.prop('limit');
+
+				if (i.glitch)
+					total += ',g';
+				else if (i.crit_glitch)
+					total += ',G';
+
+				$gear.find('.result').html(total);
+			});
+		}
+
+		// Gear
+		var simple_gear = [], complex_gear = [];
+
+		for (i in data.gear)
+		{
+			if (typeof data.gear[i] === 'string')
+			{
+				simple_gear.push(data.gear[i]);
+				continue;
+			}
+
+			if (data.gear[i].type === 'cyberdeck')
+			{
+				switch (data.gear[i].rating)
+				{
+					default:
+					case 1:
+						complex_gear.push('Erika MCD-1 cyberdeck (DR 1, Atts 4 3 2 1, Programs 1)');
+						break;
+					case 2:
+						complex_gear.push('Hermes Chariot cyberdeck (DR 2, Atts 5 4 3 2, Programs 2)');
+						break;
+					case 5:
+						complex_gear.push('Shiawase Cyber-5 cyberdeck (DR 5, Atts 8 7 6 5, Programs 5)');
+						break;
+				}
+			}
+
+			if (data.gear[i].name === 'Qi Focus')
+			{
+				complex_gear.push('Qi Focus (Force ' + data.gear[i].force + ', ' + data.gear[i].power + ' ' + data.gear[i].rating + ')');
+			}
+		}
+
+		for (i in complex_gear)
+		{
+			gear.push("<div>" + complex_gear[i] + "</div>");
+		}
+
+		if (simple_gear.length > 0)
+		{
+			gear.push("<div>" + simple_gear.join(', ') + "</div>");
+		}
+
+		// Commlink
+		var commlink = '';
+
+		switch (data.commlink)
+		{
+			default:
+			case 1:
+				commlink = 'Meta Link';
+				break;
+			case 2:
+				commlink = 'Sony Emperor';
+				break;
+			case 3:
+				commlink = 'Renraku Sensei';
+				break;
+			case 4:
+				commlink = 'Erika Elite';
+				break;
+			case 5:
+				commlink = 'Hermes Ikon';
+				break;
+			case 6:
+				commlink = 'Transys Avalon';
+		}
+
+		commlink += ' commlink (DR ' + data.commlink + ')';
+
+		commlink = '<div>' + commlink + '</div>';
+
+		gear.push(commlink);
+
+		for (i in gear)
+		{
+			$mook.find('.information .gear .value').append($(gear[i]));
+		}
+
+		// Adept Powers
+		if (data.special.is_adept === true)
+		{
+			var powers = [], power;
+
+			for (i in data.special.powers)
+			{
+				power = data.special.powers[i].name;
+
+				if (data.special.powers[i].hasOwnProperty('ability'))
+				{
+					power += ' (' + data.special.powers[i].ability + ')';
+				}
+
+				if (data.special.powers[i].hasOwnProperty('attribute'))
+				{
+					power = 'Improved ' + data.special.powers[i].attribute;
+				}
+
+				power += ' ' + data.special.powers[i].rating;
+
+				powers.push(power);
+			}
+
+			$mook.find('.information .powers .value').html(powers.join(', '));
+		}
+		else
+		{
+			$mook.find('.information .powers').hide();
+		}
+
+		// Mage spells
+		if (data.special.is_mage === true)
+		{
+			$mook.find('.information .spells .value').html(data.special.spells.join(', '));
+		}
+		else
+		{
+			$mook.find('.information .spells').hide();
+		}
+
+		// Decker Programs
+		if (data.special.is_decker === true)
+		{
+			// Find the deck in the gear, get the programs from it
+			var deck;
+
+			for (i in data.gear)
+			{
+				if (data.gear[i].hasOwnProperty('type') && data.gear[i].type === 'cyberdeck')
+				{
+					deck = data.gear[i];
+				}
+			}
+
+			$mook.find('.information .programs .value').html(deck.programs.join(', '));
+		}
+		else
+		{
+			$mook.find('.information .programs').hide();
+		}
 	},
 
-	mook_for_view: function($target, data, options)
+	mook_for_display: function($target, data, options)
 	{
 		// Given a target, nuke all contents and make a pretty rendering attached to the target
 		// will need to calculate augmented attributes, limits, and damage resistance pool
@@ -1870,8 +2762,8 @@ var render = {
 
 		// Skills
 		var skills = [], improved_skills = [], improved_rating = 0;
-		// TODO This only really accounts for 1 improved ability, but that's all that is generated right now
 
+		// TODO This only really accounts for 1 improved ability, but that's all that is generated right now
 		if (data.special.is_adept === true)
 		{
 			for (i in data.special.powers)
@@ -2029,7 +2921,7 @@ var render = {
 			if (entry.hasOwnProperty('force'))
 				entry_text.push('Force ' + entry.force);
 
-			if (entry.acc_modified !== '')
+			if (entry.acc_modified !== null)
 				entry_text.push('Acc ' + entry.acc + ' (' + entry.acc_modified + ')');
 			else
 				entry_text.push('Acc ' + entry.acc);
@@ -2081,7 +2973,7 @@ var render = {
 
 			entry_text = [entry.type];
 
-			if (entry.acc_modified !== '')
+			if (entry.acc_modified !== null)
 				entry_text.push('Acc ' + entry.acc + ' (' + entry.acc_modified + ')');
 			else
 				entry_text.push('Acc ' + entry.acc);
@@ -2247,6 +3139,19 @@ var render = {
 		{
 			$mook.find('.information .programs').hide();
 		}
+
+		// Add buttons to enter other modes
+		$mook.find('button').button();
+
+		$mook.find('.controls button.action').click(function()
+		{
+			render.mook_for_action($target, data, options);
+		});
+
+		$mook.find('.controls button.edit').click(function()
+		{
+			render.mook_for_edit($target, data, options);
+		});
 	},
 
 	calc_augmented_attributes: function(data)
@@ -2436,6 +3341,183 @@ var render = {
 		return ret;
 	},
 
+	get_condition_monitor: function(wp, data)
+	{
+		if (data.condition_monitor === 'combined')
+		{
+			return this.get_condition_monitor_combined(wp, data);
+		}
+		else if (data.condition_monitor === 'separate')
+		{
+			return this.get_condition_monitor_separate(wp, data);
+		}
+	},
+
+	get_condition_monitor_combined: function(wp, data)
+	{
+		var $cm = this.get_template('condition_monitor_combined'), i, $box, $marker, $mark;
+		var box_count = 8 + roll.half(data.attributes.body > data.attributes.will ? data.attributes.body : data.attributes.will);
+		var frequency = data.wound_penalty, total_penalty = 0, guid = this.guid();
+
+		$cm.prop('guid', guid);
+
+		for (i = 0; i <= box_count; i++)
+		{
+			$box = $('<div/>').appendTo($cm.find('.boxes'));
+			$marker = $('<div/>').appendTo($cm.find('.markers'));
+			$mark = $('<input type="radio"/>').appendTo($marker);
+
+			$mark.attr('name', 'condition_monitor_' + guid);
+			$mark.attr('id', i);
+			$mark.click(function()
+			{
+				wp.penalty = parseInt($(this).prop('penalty'), 10);
+				if (isNaN(wp.penalty))
+					wp.penalty = 0;
+				$cm.find('.penalty').html('Penalty: ' + wp.penalty);
+			});
+
+			// Add a visual to the boxes
+			if (i === 0)
+			{
+				$box.html('X');
+				$mark.click();
+			}
+			else if (frequency === '1')
+			{
+				total_penalty--;
+				$box.html(total_penalty);
+			}
+			else if (frequency === '2' || frequency === '3')
+			{
+				if ((i % frequency) === 0)
+				{
+					total_penalty--;
+					$box.html(total_penalty);
+				}
+			}
+			else
+			{
+				$box.html('&nbsp;');
+			}
+
+			$mark.prop('penalty', total_penalty);
+		}
+
+		$cm.find('.penalty').html('');
+		return $cm;
+	},
+
+	get_condition_monitor_separate: function(wp, data)
+	{
+		var $cm = this.get_template('condition_monitor_separate'), i, $box, $marker, $mark;
+		var frequency = data.wound_penalty, total_penalty = 0, guid = this.guid(), box_count;
+
+		if (!wp.hasOwnProperty('physical'))
+		{
+			wp.physical = 0;
+		}
+
+		if (!wp.hasOwnProperty('stun'))
+		{
+			wp.stun = 0;
+		}
+
+		box_count = 8 + roll.half(data.attributes.body);
+		for (i = 0; i <= box_count; i++)
+		{
+			$box = $('<div/>').appendTo($cm.find('.physical.boxes'));
+			$marker = $('<div/>').appendTo($cm.find('.physical.markers'));
+			$mark = $('<input type="radio"/>').appendTo($marker);
+
+			$mark.attr('name', 'condition_monitor_physical_' + guid);
+			$mark.attr('id', i);
+			$mark.click(function()
+			{
+				wp.physical = parseInt($(this).prop('penalty'), 10);
+				if (isNaN(wp.physical))
+					wp.physical = 0;
+				wp.penalty = wp.physical + wp.stun;
+				$cm.find('.penalty').html('Penalty: ' + wp.penalty);
+			});
+
+			// Add a visual to the boxes
+			if (i === 0)
+			{
+				$box.html('P');
+				$mark.click();
+			}
+			else if (frequency === '1')
+			{
+				total_penalty--;
+				$box.html(total_penalty);
+			}
+			else if (frequency === '2' || frequency === '3')
+			{
+				if ((i % frequency) === 0)
+				{
+					total_penalty--;
+					$box.html(total_penalty);
+				}
+			}
+			else
+			{
+				$box.html('&nbsp;');
+			}
+
+			$mark.prop('penalty', total_penalty);
+		}
+
+		box_count = 8 + roll.half(data.attributes.will);
+		total_penalty = 0;
+		for (i = 0; i <= box_count; i++)
+		{
+			$box = $('<div/>').appendTo($cm.find('.stun.boxes'));
+			$marker = $('<div/>').appendTo($cm.find('.stun.markers'));
+			$mark = $('<input type="radio"/>').appendTo($marker);
+
+			$mark.attr('name', 'condition_monitor_stun_' + guid);
+			$mark.attr('id', i);
+			$mark.click(function()
+			{
+				wp.stun = parseInt($(this).prop('penalty'), 10);
+				if (isNaN(wp.stun))
+					wp.stun = 0;
+				wp.penalty = wp.physical + wp.stun;
+				$cm.find('.penalty').html('Penalty: ' + wp.penalty);
+			});
+
+			// Add a visual to the boxes
+			if (i === 0)
+			{
+				$box.html('S');
+				$mark.click();
+			}
+			else if (frequency === '1')
+			{
+				total_penalty--;
+				$box.html(total_penalty);
+			}
+			else if (frequency === '2' || frequency === '3')
+			{
+				if ((i % frequency) === 0)
+				{
+					total_penalty--;
+					$box.html(total_penalty);
+				}
+			}
+			else
+			{
+				$box.html('&nbsp;');
+			}
+
+			$mark.prop('penalty', total_penalty);
+		}
+
+		$cm.find('.penalty').html('');
+		return $cm;
+	},
+
 	equalize_widths: function($elems)
 	{
 		var widest = 0;
@@ -2444,6 +3526,17 @@ var render = {
 		{
 			widest = $(this).width() > widest ? $(this).width() : widest;
 		}).width(widest);
+	},
+
+	guid: function()
+	{
+		return 'xxxxxxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
+			function(c)
+			{
+				var r = Math.random() * 16|0, v = c == 'x' ? r : (r&0x3|0x8);
+				return v.toString(16);
+			}
+		);
 	}
 };
 
@@ -2473,13 +3566,19 @@ var storage = {
 			}
 		]);
 
+		// Save the characters
 		localStorage.cast_characters = JSON.stringify([]);
 
+		// Save a character template
 		localStorage.cast_character_template = JSON.stringify({
 			character_id: null,
 			type: '',
 			data: null
 		});
+
+		// Settings
+		localStorage.setting_condition_monitor = 'combined';
+		localStorage.setting_wound_penalty = '3';
 	},
 
 	// Return an array of tabs with their name, tab ID, and display ordering
@@ -2597,6 +3696,20 @@ var storage = {
 		localStorage.cast_tabs = JSON.stringify(stored_tabs);
 
 		return tab_id;
+	},
+
+	// Get a specific setting
+	// Note that actually changing settings is just left to the Settings tab
+	setting: function(name)
+	{
+		if (localStorage.hasOwnProperty('setting_' + name))
+		{
+			return localStorage['setting_' + name];
+		}
+		else
+		{
+			return null;
+		}
 	}
 };
 
@@ -2800,7 +3913,8 @@ function view_generator()
 
 		$template.find('#discard_minion').button('enable');
 
-		$template.find('#add_to_cast').button('enable');
+		// TODO re-enable this line once Action and Edit modes are ready
+		// $template.find('#add_to_cast').button('enable');
 	});
 
 	$template.find('#discard_minion').button('disable').click(function ()
@@ -2812,12 +3926,7 @@ function view_generator()
 		$template.find('#add_to_cast').button('disable');
 	});
 
-	$template.find('#add_to_cast').button('disable').click(function ()
-	{
-		// $template.find('#generated_results').empty();
-		// $template.find('#discard_minion').button('disable');
-		// $template.find('#add_to_cast').button('disable');
-	});
+	$template.find('#add_to_cast').button('disable');
 
 	// TODO add a reset button to the form to reset all the values to default. Could just call view_generator()
 
@@ -2864,6 +3973,7 @@ function view_settings()
 					localStorage.clear();
 					storage.initialize_storage();
 					$( this ).dialog( "close" );
+					view_settings();
 				}
 			},
 			{
@@ -2879,6 +3989,24 @@ function view_settings()
 	{
 		$('#delete_localstorage_dialog').dialog("open");
 	});
+
+	// Condition Monitor global setting
+	$container.find('[setting="condition_monitor"]').buttonset();
+	$container.find('[setting="condition_monitor"] input#' + storage.setting('condition_monitor')).click();
+
+	$container.find('[setting="condition_monitor"] input').click(function()
+	{
+		localStorage.setting_condition_monitor = $(this).attr('id');
+	});
+
+	// Wound Penalties global setting
+	$container.find('[setting="wound_penalty"]').buttonset();
+	$container.find('[setting="wound_penalty"] input#' + storage.setting('wound_penalty')).click();
+
+	$container.find('[setting="wound_penalty"] input').click(function()
+	{
+		localStorage.setting_wound_penalty = $(this).attr('id');
+	});
 }
 
 function view_intro()
@@ -2888,6 +4016,44 @@ function view_intro()
 	var template = render.get_template('main_screen');
 
 	$container.append(template);
+
+	var $build_mismatch_dialog = $('.build_mismatch_nuke_storage').dialog({
+		autoOpen: false,
+		modal: true,
+		title: 'Fatal Version Mismatch',
+		width: 500,
+		buttons: [
+			{
+				text: "Ok",
+				click: function() {
+					localStorage.clear();
+					storage.initialize_storage();
+					$( this ).dialog( "close" );
+				}
+			},
+			{
+				text: "Cancel",
+				click: function() {
+					$( this ).dialog( "close" );
+				}
+			}
+		]
+	});
+
+	if (localStorage.build_id && localStorage.build_id !== build_id)
+	{
+		$build_mismatch_dialog.find('[software_version]').html('Version ' + build_id);
+
+		$build_mismatch_dialog.find('[stored_version]').html('Version ' + localStorage.build_id);
+
+		// TODO make this link actually work and point to the 'right' place.
+		$build_mismatch_dialog.find('[link]').html($('<a/>').attr('href', download_url).text(download_url));
+
+		// TODO remove this line when the above is done
+		$build_mismatch_dialog.find('[link]').detach();
+
+		$('.build_mismatch_nuke_storage').dialog('open');
+	}
 }
 
 function setup_controls()
@@ -2974,46 +4140,8 @@ function setup_controls()
 		// TODO prettyify
 		alert('Your browser is too old to run this utility. Please upgrade.');
 	}
-
-	var $build_mismatch_dialog = $('.build_mismatch_nuke_storage').dialog({
-		autoOpen: false,
-		modal: true,
-		title: 'Fatal Version Mismatch',
-		width: 500,
-		buttons: [
-			{
-				text: "Ok",
-				click: function() {
-					localStorage.clear();
-					storage.initialize_storage();
-					$( this ).dialog( "close" );
-				}
-			},
-			{
-				text: "Cancel",
-				click: function() {
-					$( this ).dialog( "close" );
-				}
-			}
-		]
-	});
-
-	if (localStorage.build_id && localStorage.build_id !== build_id)
-	{
-		$build_mismatch_dialog.find('[software_version]').html('Version ' + build_id);
-
-		$build_mismatch_dialog.find('[stored_version]').html('Version ' + localStorage.build_id);
-
-		// TODO make this link actually work and point to the 'right' place.
-		$build_mismatch_dialog.find('[link]').html($('<a/>').attr('href', download_url).text(download_url));
-
-		// TODO remove this line when the above is done
-		$build_mismatch_dialog.find('[link]').detach();
-
-		$('.build_mismatch_nuke_storage').dialog('open');
-	}
 }
 
-var build_id = '0.3a';
+var build_id = '0.4';
 
 var download_url = 'http://google.com';

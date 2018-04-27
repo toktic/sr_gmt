@@ -64,6 +64,19 @@ body{
 }
 
 
+.tiny_button
+{
+	font-weight: normal;
+	padding: 0;
+	font-size: 0.5em;
+}
+
+.tiny_button:hover
+{
+	font-weight: normal;
+}
+
+
 
 
 
@@ -250,6 +263,20 @@ div[template_holder]
 	font-size: 0.9em;
 }
 
+.display_npc_wrapper .controls
+{
+	float: right;
+	font-size: 0;
+	margin-top: 2px;
+	margin-right: 2px;
+}
+
+.display_npc_wrapper .controls button
+{
+	margin-left: 1px;
+	margin-right: 1px;
+}
+
 .display_npc_wrapper .npc_name,
 .display_npc_wrapper .npc_description
 {
@@ -284,7 +311,7 @@ div[template_holder]
 	width: 100%
 }
 
-.display_npc_wrapper .information label
+.display_npc_wrapper .information > div > label
 {
 	padding: 2px;
 	width: 160px;
@@ -295,12 +322,150 @@ div[template_holder]
 	font-weight: bold;
 }
 
-.display_npc_wrapper .information .value
+.display_npc_wrapper .information > div > div,
+.display_npc_wrapper .information > div.skills > div > div
 {
 	padding: 2px;
-	display: table-cell;
+	display: flex;
 	vertical-align: top;
 }
+
+.display_npc_wrapper .information > div.gear > div,
+.display_npc_wrapper .information > div.skills > div
+{
+	display: table-cell;
+}
+
+.display_npc_wrapper .information > div.skills .skill
+{
+	flex: 3 0 120px;
+	border-bottom: 1px dotted #666;
+}
+
+.display_npc_wrapper .information > div.skills button
+{
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+.display_npc_wrapper .information > div.skills .result
+{
+	flex: 2 0 40px;
+}
+
+.action_npc_wrapper .information .rollable
+{
+	display: flex;
+}
+
+.action_npc_wrapper .information .rollable > div:not(.result)
+{
+	flex: 3 0 120px;
+}
+
+.action_npc_wrapper .information .rollable > button
+{
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+.action_npc_wrapper .information .rollable > .result
+{
+	flex: 2 0 40px;
+}
+
+.action_npc_wrapper .information > div > div > button
+{
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.action_npc_wrapper .information > div > div .result
+{
+	color: #000;
+	background-color: #ccc;
+	min-width: 40px;
+	padding-left: 4px;
+	padding-right: 4px;
+	text-align: center;
+}
+
+.action_npc_wrapper .information > .gear > .value > div
+{
+	display: flex;
+	padding: 2px;
+}
+
+.action_npc_wrapper .information > .gear > .value > div .stats
+{
+	flex: 3 0 120px;
+	border-bottom: 1px dotted #666;
+}
+
+.action_npc_wrapper .information > .gear > .value > div button
+{
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.action_npc_wrapper .information > .gear > .value > div .result
+{
+	flex: 0 0 40px;
+}
+
+
+.action_npc_wrapper .information .condition_monitor_combined,
+.action_npc_wrapper .information .condition_monitor_separate
+{
+	width: 100%;
+	display: flex;
+}
+
+.action_npc_wrapper .information .condition_monitor_combined .monitor,
+.action_npc_wrapper .information .condition_monitor_separate .monitor
+{
+	border: 1px solid #999;
+	flex: 3 0 1px;
+	margin-left: 4px;
+}
+
+.action_npc_wrapper .information .condition_monitor_combined .monitor .boxes,
+.action_npc_wrapper .information .condition_monitor_separate .monitor .boxes
+{
+	display: flex;
+}
+
+.action_npc_wrapper .information .condition_monitor_combined .monitor .boxes > div,
+.action_npc_wrapper .information .condition_monitor_separate .monitor .boxes > div
+{
+	background-color: #222;
+	border: 1px solid #333;
+	color: #666;
+	flex: 1 1 1px;
+	text-align: center;
+}
+
+.action_npc_wrapper .information .condition_monitor_combined .monitor .markers,
+.action_npc_wrapper .information .condition_monitor_separate .monitor .markers
+{
+	display: flex;
+}
+
+.action_npc_wrapper .information .condition_monitor_combined .monitor .markers > div,
+.action_npc_wrapper .information .condition_monitor_separate .monitor .markers > div
+{
+	flex: 1 1 1px;
+}
+
+.action_npc_wrapper .information .condition_monitor_combined .penalty,
+.action_npc_wrapper .information .condition_monitor_separate .penalty
+{
+	flex: 2 0 1px;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+
 
 .cast_of_shadows
 {

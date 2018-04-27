@@ -163,6 +163,22 @@
 			<h3>Minion Condition Monitor</h3>
 			<p>Minions, by default, have a combined Condition Monitor based on their BODY and WILL scores. If you want your minions to have separate health tracks for Stun and Physical damage, make that change here.</p>
 			<p>Changes here will reflect on all minions created after this point. Any minions already existing will need to be edited individually.</p>
+			<div setting="condition_monitor">
+				<input type="radio" id="combined" name="condition_monitor"><label for="combined">Combined</label>
+				<input type="radio" id="separate" name="condition_monitor"><label for="separate">Separate</label>
+			</div>
+		</div>
+
+		<div class="row">
+			<h3>Minion Wound Penalties</h3>
+			<p>Minions normally suffer a die penalty of -1 per 3 full boxes on their condition monitor. This can be changed to every 2 boxes, every box, or even ignore wound penalties.</p>
+			<p>Changes here will reflect on all minions created after this point. Any minions already existing will need to be edited individually.</p>
+			<div setting="wound_penalty">
+				<input type="radio" id="3" name="wound_penalty"><label for="3">-1 per 3 boxes</label>
+				<input type="radio" id="2" name="wound_penalty"><label for="2">-1 per 2 boxes</label>
+				<input type="radio" id="1" name="wound_penalty"><label for="1">-1 every box</label>
+				<input type="radio" id="0" name="wound_penalty"><label for="0">No wound penalties</label>
+			</div>
 		</div>
 
 		<div class="delete_localstorage_dialog">
@@ -279,7 +295,10 @@
 
 	<div template="render__display_npc">
 		<div class="display_npc_wrapper">
-			<div class="controls"></div>
+			<div class="controls">
+				<button class="tiny_button action"><span title="Action mode" class="ui-icon ui-icon-play"></span></button>
+				<button class="tiny_button edit"><span title="Edit mode" class="ui-icon ui-icon-pencil"></span></button>
+			</div>
 			<div class="npc_name"></div>
 			<div class="npc_description"></div>
 			<div class="attribute_names">
@@ -385,6 +404,281 @@
 				</div>
 			</div>
 		</div>
+	</div>
+
+	<div template="render__action_npc">
+		<div class="display_npc_wrapper action_npc_wrapper">
+			<div class="controls">
+				<button class="tiny_button display"><span title="Display mode" class="ui-icon ui-icon-search"></span></button>
+				<button class="tiny_button edit"><span title="Edit mode" class="ui-icon ui-icon-pencil"></span></button>
+			</div>
+			<div class="npc_name"></div>
+			<div class="npc_description"></div>
+			<div class="attribute_names">
+				<div class="attribute_name">BOD</div>
+				<div class="attribute_name">AGI</div>
+				<div class="attribute_name">REA</div>
+				<div class="attribute_name">STR</div>
+				<div class="attribute_name">WIL</div>
+				<div class="attribute_name">LOG</div>
+				<div class="attribute_name">INT</div>
+				<div class="attribute_name">CHA</div>
+				<div class="attribute_name essence">ESS</div>
+				<div class="attribute_name magic">MAG</div>
+			</div>
+
+			<div class="attribute_values">
+				<div class="attribute_value body"></div>
+				<div class="attribute_value agility"></div>
+				<div class="attribute_value reaction"></div>
+				<div class="attribute_value strength"></div>
+				<div class="attribute_value will"></div>
+				<div class="attribute_value logic"></div>
+				<div class="attribute_value intuition"></div>
+				<div class="attribute_value charisma"></div>
+				<div class="attribute_value essence"></div>
+				<div class="attribute_value magic"></div>
+			</div>
+
+			<div class="information">
+				<div class="initiative">
+					<label>Initiative</label>
+					<div class="rollable">
+						<div class="value"></div>
+						<button class="tiny_button display"><span title="Roll" class="ui-icon ui-icon-seek-next"></span></button>
+						<div class="result"></div>
+					</div>
+				</div>
+
+				<div class="astral_initiative">
+					<label>Astral Initiative</label>
+					<div class="rollable">
+						<div class="value"></div>
+						<button class="tiny_button display"><span title="Roll" class="ui-icon ui-icon-seek-next"></span></button>
+						<div class="result"></div>
+					</div>
+				</div>
+
+				<div class="matrix_initiative">
+					<label>Matrix Initiative (Hot VR)</label>
+					<div class="rollable">
+						<div class="value"></div>
+						<button class="tiny_button display"><span title="Roll" class="ui-icon ui-icon-seek-next"></span></button>
+						<div class="result"></div>
+					</div>
+				</div>
+
+				<div class="damage_resistance">
+					<label>Damage Resistance</label>
+					<div class="rollable">
+						<div class="value"></div>
+						<button class="tiny_button display"><span title="Roll" class="ui-icon ui-icon-seek-next"></span></button>
+						<div class="result"></div>
+					</div>
+				</div>
+
+				<div class="condition_monitor">
+					<label>Condition Monitor</label>
+				</div>
+
+				<div class="limits">
+					<label>Limits</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="qualities">
+					<label>Qualities</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="initiate_grade">
+					<label>Initiate Grade</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="skills">
+					<label>Skills</label>
+					<div class="skill_list"></div>
+				</div>
+
+				<div class="augments">
+					<label>Augmentations</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="armor">
+					<label>Armor</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="gear">
+					<label>Gear</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="spells">
+					<label>Spells</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="powers">
+					<label>Powers</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="programs">
+					<label>Programs</label>
+					<div class="value"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div template="render__edit_npc">
+		<div class="display_npc_wrapper">
+			<div class="controls">
+				<button class="tiny_button action"><span title="Action mode" class="ui-icon ui-icon-play"></span></button>
+				<button class="tiny_button display"><span title="Display mode" class="ui-icon ui-icon-search"></span></button>
+			</div>
+			<div class="npc_name"></div>
+			<div class="npc_description"></div>
+			<div class="attribute_names">
+				<div class="attribute_name">BOD</div>
+				<div class="attribute_name">AGI</div>
+				<div class="attribute_name">REA</div>
+				<div class="attribute_name">STR</div>
+				<div class="attribute_name">WIL</div>
+				<div class="attribute_name">LOG</div>
+				<div class="attribute_name">INT</div>
+				<div class="attribute_name">CHA</div>
+				<div class="attribute_name essence">ESS</div>
+				<div class="attribute_name magic">MAG</div>
+			</div>
+
+			<div class="attribute_values">
+				<div class="attribute_value body"></div>
+				<div class="attribute_value agility"></div>
+				<div class="attribute_value reaction"></div>
+				<div class="attribute_value strength"></div>
+				<div class="attribute_value will"></div>
+				<div class="attribute_value logic"></div>
+				<div class="attribute_value intuition"></div>
+				<div class="attribute_value charisma"></div>
+				<div class="attribute_value essence"></div>
+				<div class="attribute_value magic"></div>
+			</div>
+
+			<div class="information">
+				<div class="initiative">
+					<label>Initiative</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="astral_initiative">
+					<label>Astral Initiative</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="matrix_initiative">
+					<label>Matrix Initiative (Hot VR)</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="damage_resistance">
+					<label>Damage Resistance</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="condition_monitor">
+					<label>Condition Monitor</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="limits">
+					<label>Limits</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="qualities">
+					<label>Qualities</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="initiate_grade">
+					<label>Initiate Grade</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="skills">
+					<label>Skills</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="augments">
+					<label>Augmentations</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="armor">
+					<label>Armor</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="gear">
+					<label>Gear</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="spells">
+					<label>Spells</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="powers">
+					<label>Powers</label>
+					<div class="value"></div>
+				</div>
+
+				<div class="programs">
+					<label>Programs</label>
+					<div class="value"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div template="condition_monitor_combined">
+		<div class="condition_monitor_combined">
+			<div class="monitor">
+				<div class="boxes"></div>
+				<div class="markers"></div>
+			</div>
+			<div class="penalty"></div>
+		</div>
+	</div>
+
+	<div template="condition_monitor_separate">
+		<div class="condition_monitor_separate">
+			<div class="monitor">
+				<div class="boxes physical"></div>
+				<div class="markers physical"></div>
+				<div class="boxes stun"></div>
+				<div class="markers stun"></div>
+			</div>
+			<div class="penalty"></div>
+		</div>
+	</div>
+
+	<div template="action_skill" class="rollable">
+		<div class="skill"></div>
+		<button class="tiny_button display"><span title="Roll" class="ui-icon ui-icon-seek-next"></span></button>
+		<div class="result"></div>
+	</div>
+
+	<div template="weapon">
+		<div class="stats"></div>
+		<button class="tiny_button display"><span title="Roll" class="ui-icon ui-icon-seek-next"></span></button>
+		<div class="result"></div>
 	</div>
 </div>
 </body>
