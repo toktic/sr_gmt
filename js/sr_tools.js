@@ -1613,6 +1613,7 @@ var gen = {
 			augmentations: [],
 			special: {},
 			commlink: 1,
+			created: new Date().toJSON(),
 			professional_type: options.professional_type
 		};
 
@@ -3548,13 +3549,13 @@ var storage = {
 
 		// // Cast of Shadows
 		// What tab ID were we last snowing?
-		localStorage.cast_tab_id = null;
+		localStorage.cast_tab_id = 1;
 
 		// What character ID did we last create?
-		localStorage.cast_character_id = 1;
+		localStorage.cast_character_id = 0;
 
 		// What tab did we show last?
-		localStorage.cast_current_tab = null;
+		localStorage.cast_current_tab = 1;
 
 		// What tabs are there?
 		localStorage.cast_tabs = JSON.stringify([
@@ -3582,7 +3583,7 @@ var storage = {
 	},
 
 	// Return an array of tabs with their name, tab ID, and display ordering
-	get_tabs: function()
+	get_cast_tabs: function()
 	{
 		var stored_tabs = JSON.parse(localStorage.cast_tabs);
 
@@ -3600,17 +3601,24 @@ var storage = {
 	},
 
 	// Return the currently displayed tab ID
-	get_current_tab: function()
+	get_current_cast_tab: function()
 	{
+		return parseInt(localStorage.cast_current_tab, 10);
+	},
+
+	// Set which tab we are viewing now
+	set_current_cast_tab: function(id)
+	{
+		localStorage.cast_current_tab = id;
 	},
 
 	// Get information about a tab
-	get_tab: function(tab_id)
+	get_cast_tab: function(tab_id)
 	{
 	},
 
 	// Update a given tab, also for adding a new tab
-	set_tab: function(tab_id, name, order)
+	set_cast_tab: function(tab_id, name, order)
 	{
 		// If the order isn't the same as the existing tabs, update other tabs to match?
 		var stored_tabs = JSON.parse(localStorage.cast_tabs);
@@ -3651,7 +3659,7 @@ var storage = {
 	},
 
 	// Delete a given tab from storage
-	delete_tab: function(tab_id)
+	delete_cast_tab: function(tab_id)
 	{
 		if (tab_id === 1)
 			return;
@@ -3669,22 +3677,81 @@ var storage = {
 
 	generate_character_id: function()
 	{
+		var id = parseInt(localStorage.cast_character_id, 10) + 1;
+		localStorage.cast_character_id = id;
+		return id;
+	},
+
+	generate_cast_tab_id: function()
+	{
+		var id = parseInt(localStorage.cast_tab_id, 10) + 1;
+		localStorage.cast_tab_id = id;
+		return id;
+	},
+
+
+	get_characters: function()
+	{
+		return JSON.parse(localStorage.cast_characters);
+	},
+
+	get_character: function(id)
+	{
+
+	},
+
+	set_character: function(data)
+	{
+		var cast_characters = JSON.parse(localStorage.cast_characters), new_char = false;
+
+		if (!data.hasOwnProperty('character_id'))
+		{
+			new_char = true;
+			data.character_id = this.generate_character_id();
+		}
+
+		if (new_char)
+		{
+			cast_characters.push(data);
+		}
+		else
+		{
+			// TODO need to find my existing entry and overwrite it
+			debugger;
+		}
+
+		localStorage.cast_characters = JSON.stringify(cast_characters);
+
+		return data;
+	},
+
+	delete_character_from_tab: function(tab_id, character_id)
+	{
+
+	},
+
+	delete_character: function(id)
+	{
+		// TODO figure out how to remove it from any tabs it's already added to
+
+		var old_cast = JSON.parse(localStorage.cast_characters), new_cast = [], i = 0;
+
+		for (i; i < old_cast.length; i++)
+		{
+			if (id !== old_cast[i].character_id)
+				new_cast.push(old_cast[i]);
+		}
+
+		localStorage.cast_characters = JSON.stringify(new_cast);
 	},
 
 	// Return the ID of the newly created tab
-	create_tab: function(tab_name)
+	create_cast_tab: function(tab_name)
 	{
 		// Find the highest tab ID now
-		var tab_id = 1, sort_order, stored_tabs = JSON.parse(localStorage.cast_tabs);
+		var tab_id = this.generate_cast_tab_id(), sort_order, stored_tabs = JSON.parse(localStorage.cast_tabs);
 
 		sort_order = stored_tabs.length + 1;
-
-		stored_tabs.forEach(function(tab)
-		{
-			tab_id = Math.max(tab_id, tab.tab_id);
-		});
-
-		tab_id++;
 
 		stored_tabs.push({
 			tab_id: tab_id,
@@ -3713,25 +3780,21 @@ var storage = {
 	}
 };
 
-function view_cast()
+function view_cast(show_intro)
 {
 	var $container = $('.main_content').empty();
-
 	var $template = render.get_template('cast_of_shadows');
-
-	var tabs_added = 0;
+	var tabs_added = 0, tab_index_to_show;
 
 	$container.append($template);
 
-	var tabs = storage.get_tabs();
-
-	console.log('tabs', tabs);
+	var tabs = storage.get_cast_tabs();
 
 	tabs.forEach(function(tab)
 	{
 		tabs_added++;
 
-		var $href = $('<a>' + tab.name + '</a>').attr('href', '#' + tab.href);
+		var $href = $('<a>' + tab.name + '</a>').attr('href', '#' + tab.href).attr('tab_id', tab.tab_id);
 
 		var $li = $('<li/>').append($href);
 
@@ -3739,11 +3802,57 @@ function view_cast()
 
 		var $div = $('<div/>', {id: tab.href}).appendTo($template.find('.cast_of_shadows'));
 
-		// TODO Need to add all the character IDs to the tab so they can be filled out too
-		$div.addClass('cast_tab').prop('characters', tab.characters);
+		// Fill the Full Cast tab with the entire cast. Additional tabs only show what they need to
+		if (tab.tab_id === 1)
+		{
+			$div.append(render.get_template('cast__full_list'));
 
-		// TODO Need a section to let you copy in characters from the main tab
-		$div.append($("<div/>").html(tab.name)).append("TODO Add a way to copy in cast members");
+			var full_cast = storage.get_characters();
+
+			full_cast.forEach(function(cast)
+			{
+				var $char_template = render.get_template('cast__full_list_entry').appendTo($div.find('[list]'));
+
+				render.mook_for_action($char_template.find('.entry'), cast);
+
+				var $deletion_dialog = $char_template.find('.dialog').dialog({
+					autoOpen: false,
+					modal: true,
+					title: 'Remove Cast Member',
+					width: 450,
+					buttons: [
+						{
+							text: "Ok",
+							click: function() {
+								storage.delete_character(cast.character_id);
+								$(this).dialog("close");
+								view_cast();
+							}
+						},
+						{
+							text: "Cancel",
+							click: function() {
+								$(this).dialog("close");
+							}
+						}
+					]
+				});
+
+				$char_template.find('.delete_cast_member').button().click(function ()
+				{
+					$deletion_dialog.dialog('open');
+				});
+			});
+		}
+		else
+		{
+			// TODO Need a section to let you copy in characters from the main tab
+			$div.append($("<div/>").html(tab.name)).append("TODO Add a way to copy in cast members");
+
+			// TODO Need to add all the character IDs to the tab so they can be filled out too
+			// $div.addClass('cast_tab').prop('characters', tab.characters);
+
+		}
 
 		// Add a row for editing this tab to the introduction edit area
 		var $row_template = render.get_template('edit_tab_row');
@@ -3753,19 +3862,23 @@ function view_cast()
 		$row_template.find('#tab_name').val(tab.name);
 
 		// Check will save the name
-		$row_template.find('button.tab_edit').button();
-
-		$row_template.find('button.tab_edit').click(function ()
+		var save_tab_data = function ()
 		{
-			console.log('edit tab name', tab.tab_id, $row_template.find('#tab_name').val());
-
-			var tab_name = $row_template.find('#tab_name').val().replace(/\W/g, '');
+			var tab_name = $row_template.find('#tab_name').val().replace(/\W/g, ' ').trim();
 
 			if (tab.name !== tab_name && tab_name !== '')
 			{
-				storage.set_tab(tab.tab_id, tab_name);
+				storage.set_cast_tab(tab.tab_id, tab_name);
+				storage.set_current_cast_tab(tab.tab_id);
 				view_cast();
 			}
+		};
+
+		$row_template.find('button.tab_edit').button().click(save_tab_data);
+		$row_template.find('#tab_name').on('keyup', function (e)
+		{
+			if (e.keyCode === 13)
+				save_tab_data();
 		});
 
 		// Up arrow moves tab up
@@ -3775,8 +3888,7 @@ function view_cast()
 		{
 			$row_template.find('button.tab_up').click(function ()
 			{
-				console.log('move tab up', tab.tab_id);
-				storage.set_tab(tab.tab_id, null, (tab.order - 1));
+				storage.set_cast_tab(tab.tab_id, null, (tab.order - 1));
 				view_cast();
 			});
 		}
@@ -3792,8 +3904,7 @@ function view_cast()
 		{
 			$row_template.find('button.tab_down').click(function ()
 			{
-				console.log('move tab down', tab.tab_id);
-				storage.set_tab(tab.tab_id, null, (tab.order + 1));
+				storage.set_cast_tab(tab.tab_id, null, (tab.order + 1));
 				view_cast();
 			});
 		}
@@ -3809,9 +3920,9 @@ function view_cast()
 		{
 			$row_template.find('button.delete_tab').click(function ()
 			{
-				console.log('delete tab', tab.tab_id);
-				storage.delete_tab(tab.tab_id);
-				view_cast();
+				storage.delete_cast_tab(tab.tab_id);
+				storage.set_current_cast_tab(1);
+				view_cast(true);
 			});
 		}
 		else
@@ -3822,32 +3933,35 @@ function view_cast()
 
 	$template.tabs();
 
-	// Be able to add a tab
-	$template.find('button.add_tab').button().click(function()
+	var add_new_tab = function()
 	{
-		var tab_name = $('.cast_of_shadows #add_tab_name').val();
+		var tab_name = $('.cast_of_shadows #add_tab_name').val(), tab_id;
 
 		if (tab_name === '')
 		{
-			console.log('blank');
 			return;
 		}
 
-		console.log('create tab!');
-
-		storage.create_tab(tab_name);
+		tab_id = storage.create_cast_tab(tab_name);
+		storage.set_current_cast_tab(tab_id);
 
 		view_cast();
+	};
+
+	// Be able to add a tab
+	$template.find('button.add_tab').button().click(add_new_tab);
+	$template.find('.add_tab_wrapper #add_tab_name').on('keyup', function (e)
+	{
+		if (e.keyCode === 13)
+			add_new_tab();
 	});
 
-	/*
-	Get the list of tabs from a function
-	-    function should also convert all strings into href-able strings
-	for each tab
-	-    add an li+href to the ul.cast_tabs
-	-    append a div#id to div.cast_of_shadows
-	TODO add the content that lets you edit tabs too.
-	 */
+	// Activate the last-viewed tab, or the Full Cast if we've just created something
+	tab_index_to_show = storage.get_current_cast_tab();
+	tab_index_to_show = $template.find('a[tab_id="' + tab_index_to_show + '"]').parent().index();
+	if (show_intro === true)
+		tab_index_to_show = 0;
+	$template.tabs('option', 'active', tab_index_to_show);
 }
 
 function view_generator()
@@ -3913,8 +4027,15 @@ function view_generator()
 
 		$template.find('#discard_minion').button('enable');
 
-		// TODO re-enable this line once Action and Edit modes are ready
-		// $template.find('#add_to_cast').button('enable');
+		$template.find('#add_to_cast').button('enable').off('click').click(function()
+		{
+			storage.set_character(current_npc);
+
+			// When we create a new character, go to the full cast
+			storage.set_current_cast_tab(1);
+
+			view_cast();
+		});
 	});
 
 	$template.find('#discard_minion').button('disable').click(function ()
@@ -4142,6 +4263,6 @@ function setup_controls()
 	}
 }
 
-var build_id = '0.4';
+var build_id = '0.5';
 
-var download_url = 'http://google.com';
+var download_url = 'https://github.com/toktic/sr_gmt';

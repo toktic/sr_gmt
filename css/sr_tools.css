@@ -486,3 +486,35 @@ div[template_holder]
 {
 	vertical-align: bottom;
 }
+
+.cast_of_shadows .cast_tabs
+{
+
+}
+
+.cast_of_shadows .cast__full_list
+{
+
+}
+
+.cast_of_shadows .cast__full_list > div[list]
+{
+
+}
+
+.cast_of_shadows .cast__full_list > div[list] > div
+{
+	display: flex;
+	margin-bottom: 10px;
+}
+
+.cast_of_shadows .cast__full_list > div[list] > div > .entry
+{
+	flex: 1 0 500px;
+}
+
+.cast_of_shadows .cast__full_list > div[list] > div > .remove
+{
+	flex: 2 0 200px;
+	padding-left: 10px;
+}
