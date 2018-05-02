@@ -825,6 +825,8 @@ var db = {
 	{
 		var res = {
 			attributes: {body: 0, agility: 0, reaction: 0, strength: 0, will: 0, logic: 0, intuition: 0, charisma: 0},
+			min_attributes: {body: 1, agility: 1, reaction: 1, strength: 1, will: 1, logic: 1, intuition: 1, charisma: 1},
+			max_attributes: {body: 6, agility: 6, reaction: 6, strength: 6, will: 6, logic: 6, intuition: 6, charisma: 6},
 			augmentations: []
 		};
 
@@ -835,30 +837,62 @@ var db = {
 
 			case 'Elf':
 				res.attributes.agility = 1;
+				res.min_attributes.agility = 2;
+				res.max_attributes.agility = 7;
 				res.attributes.charisma = 2;
+				res.min_attributes.charisma = 3;
+				res.max_attributes.charisma = 8;
 				break;
 
 			case 'Dwarf':
 				res.attributes.body = 2;
+				res.min_attributes.body = 3;
+				res.max_attributes.body = 8;
 				res.attributes.reaction = -1;
+				res.min_attributes.reaction = 1;
+				res.max_attributes.reaction = 5;
 				res.attributes.strength = 2;
+				res.min_attributes.strength = 3;
+				res.max_attributes.strength = 8;
 				res.attributes.will = 1;
+				res.min_attributes.will = 2;
+				res.max_attributes.will = 7;
 				break;
 
 			case 'Ork':
 				res.attributes.body = 3;
+				res.min_attributes.body = 4;
+				res.max_attributes.body = 9;
 				res.attributes.strength = 2;
+				res.min_attributes.strength = 3;
+				res.max_attributes.strength = 8;
 				res.attributes.logic = -1;
+				res.min_attributes.logic = 1;
+				res.max_attributes.logic = 5;
 				res.attributes.charisma = -1;
+				res.min_attributes.charisma = 1;
+				res.max_attributes.charisma = 5;
 				break;
 
 			case 'Troll':
 				res.attributes.body = 4;
+				res.min_attributes.body = 5;
+				res.max_attributes.body = 10;
 				res.attributes.agility = -1;
+				res.min_attributes.agility = 1;
+				res.max_attributes.agility = 5;
 				res.attributes.strength = 4;
+				res.min_attributes.strength = 5;
+				res.max_attributes.strength = 10;
 				res.attributes.logic = -1;
+				res.min_attributes.logic = 1;
+				res.max_attributes.logic = 5;
 				res.attributes.intuition = -1;
+				res.min_attributes.intuition = 1;
+				res.max_attributes.intuition = 5;
 				res.attributes.charisma = -2;
+				res.min_attributes.charisma = 1;
+				res.max_attributes.charisma = 4;
 				res.augmentations.push('Troll Dermal Deposits');
 				break;
 
@@ -1145,6 +1179,94 @@ var db = {
 		}
 
 		return data;
+	},
+
+	get_quality_list: function()
+	{
+		return {
+			positive: [
+				'Ambidextrous',
+				'Analytical Mind',
+				'Astral Chameleon',
+				'Blandness',
+				'Catlike',
+				'First Impression',
+				'Gearhead',
+				'Guts',
+				'Home Ground',
+				'Human-Looking',
+				'Lucky',
+				'Magical Resistance I',
+				'Photographic Memory',
+				'Toughness',
+				'Will to Live I'
+			],
+			negative: [
+				'Bad Luck',
+				'Bad Rep',
+				'Combat Paralysis',
+				'Dependent(s)',
+				'Distinctive Style',
+				'Elf Poser',
+				'Gremlins I',
+				'Insomnia I',
+				'Loss of Confidence',
+				'Ork Poser',
+				'Scorched',
+				'Sensitive System',
+				'Social Stress',
+				'Uncouth',
+				'Uneducated'
+			]
+		};
+
+	},
+
+	get_skill_list: function()
+	{
+		return [
+			'Arcana',
+			'Assessing',
+			'Astral Combat',
+			'Automatics',
+			'Banishing',
+			'Binding',
+			'Blades',
+			'Clubs',
+			'Computer',
+			'Con',
+			'Counterspelling',
+			'Cybercombat',
+			'Demolitions',
+			'Disguise',
+			'Electronic Warfare',
+			'Etiquette',
+			'First Aid',
+			'Gunnery',
+			'Gymnastics',
+			'Hacking',
+			'Hardware',
+			'Heavy Weapons',
+			'Impersonation',
+			'Intimidation',
+			'Leadership',
+			'Longarms',
+			'Navigation',
+			'Negotiation',
+			'Palming',
+			'Perception',
+			'Pilot Aircraft',
+			'Pilot Ground Craft',
+			'Pistols',
+			'Running',
+			'Sneaking',
+			'Spellcasting',
+			'Summoning',
+			'Swimming',
+			'Throwing Weapons',
+			'Tracking',
+			'Unarmed Combat'
+		];
 	},
 
 	get_skill_attributes: function (skill)
@@ -1818,6 +1940,10 @@ var render = {
 	{
 		var i, $mook = render.get_template('render__edit_npc');
 
+		options = $.extend({}, {
+			view_after_save: 'action'
+		}, options);
+
 		$target.empty().append($mook);
 
 		// Add buttons to enter other modes
@@ -1833,11 +1959,325 @@ var render = {
 			render.mook_for_display($target, data, options);
 		});
 
+		$mook.find('.controls button.revert').click(function()
+		{
+			render.mook_for_edit($target, data, options);
+		});
+
+		var save_mook = function()
+		{
+			var changes_made = false;
+
+			console.log('in save_mook()', data, $mook);
+
+			// Name
+			if (data.name !== $mook.find('#name').val().trim())
+			{
+				data.name = $mook.find('#name').val().trim();
+				changes_made = true;
+			}
+
+			// Gender
+			if (data.gender !== $mook.find('select[name="gender"]').val().trim())
+			{
+				data.gender = $mook.find('select[name="gender"]').val().trim();
+				changes_made = true;
+			}
+
+			// Race
+			if (data.race !== $mook.find('select[name="race"]').val().trim())
+			{
+				data.race = $mook.find('select[name="race"]').val().trim();
+				changes_made = true;
+			}
+
+			// Attributes
+			var attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma'];
+
+			attributes.forEach(function(attribute)
+			{
+				if (data.attributes[attribute] !== $mook.find('.attribute_values select[name="attribute_' + attribute + '"]').val())
+				{
+					data.attributes[attribute] = $mook.find('.attribute_values select[name="attribute_' + attribute + '"]').val();
+					changes_made = true;
+				}
+			});
+
+			// Condition Monitor
+			if (data.condition_monitor !== $mook.find('.condition_monitor input[name="condition_monitor"]:checked').attr('id'))
+			{
+				data.condition_monitor = $mook.find('.condition_monitor input[name="condition_monitor"]:checked').attr('id');
+				changes_made = true;
+			}
+
+			// Wound Penalties
+			if (data.wound_penalty !== $mook.find('.wound_penalty input[name="wound_penalty"]:checked').attr('id'))
+			{
+				data.wound_penalty = $mook.find('.wound_penalty input[name="wound_penalty"]:checked').attr('id');
+				changes_made = true;
+			}
+
+			// Qualities
+			// TODO
+
+			// Skills
+			// TODO
+
+			// Augmentations
+			// TODO
+
+			// Armor
+			// TODO
+
+			// Gear
+			// TODO
+
+			// Weapons
+			// TODO
+
+			// Commlink
+			// TODO
 
 
 
-		// TODO this will be looooots of fun. Totally.
 
+			console.log('updated mook', data);
+
+
+
+			if (data.hasOwnProperty('character_id') && changes_made)
+			{
+				storage.set_character(data);
+			}
+
+			switch (options.view_after_save)
+			{
+				case 'action':
+					render.mook_for_action($target, data, options);
+					break;
+
+				case 'display':
+					render.mook_for_display($target, data, options);
+					break;
+
+				case 'edit':
+					render.mook_for_edit($target, data, options);
+					break;
+			}
+		};
+
+		$mook.find('.controls button.save').click(save_mook);
+
+		// Mook name
+		$mook.find('#name').val(data.name);
+
+		// Gender
+		$mook.find('select[name="gender"] option[value="' + data.gender + '"]').prop('selected', true);
+
+		// Race
+		$mook.find('select[name="race"] option[value="' + data.race + '"]').prop('selected', true);
+
+		var attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma'];
+		var metatype_attributes = db.get_metatype_adjustment(data.race);
+
+		attributes.forEach(function(attribute)
+		{
+			var $select = $('<select name="attribute_' + attribute + '"/>').appendTo($mook.find('.attribute_values .attribute_value.' + attribute));
+
+			for (var i = metatype_attributes.min_attributes[attribute]; i <= metatype_attributes.max_attributes[attribute]; i++)
+			{
+				$select.append($('<option/>').html(i).attr('value', i))
+			}
+
+			if (data.attributes[attribute] < metatype_attributes.min_attributes[attribute])
+				data.attributes[attribute] = metatype_attributes.min_attributes[attribute];
+
+			if (data.attributes[attribute] > metatype_attributes.max_attributes[attribute])
+				data.attributes[attribute] = metatype_attributes.max_attributes[attribute];
+
+			$mook.find('.attribute_values select[name="attribute_' + attribute + '"] option[value="' + data.attributes[attribute] + '"]').prop('selected', true);
+		});
+
+		// TODO if they didn't start out as a mage or adept, remove the Magic score
+		// just deal with Magic separately
+		// also deal with `initiate` value, since that should be editable. And can go from 0-6
+		// Thankfully, as of this writing we only have Initiates for Adepts, not for actual Mages.
+		//
+		// I might just need to dis-allow this. Changing an adept's Magic score means adjusting their power points.
+		// Sure, adjusting a mage would be easier, but still not easy.
+		$mook.find('.attribute_names .magic, .attribute_names .initiate').hide();
+		$mook.find('.attribute_values .magic, .attribute_values .initiate').hide();
+
+		// Condition Monitor
+		$mook.find('.other_information .condition_monitor > div').buttonset();
+		$mook.find('.other_information .condition_monitor input#' + data.condition_monitor).click();
+
+		// Wound Penalties
+		$mook.find('.other_information .wound_penalty > div').buttonset();
+		$mook.find('.other_information .wound_penalty input#' + data.wound_penalty).click();
+
+		// Qualities
+		var redraw_qualities = function()
+		{
+			var all_qualities = db.get_quality_list(), $new_quality, $select;
+			var $positive_qualities = $mook.find('.other_information .qualities > div.positive');
+			var $negative_qualities = $mook.find('.other_information .qualities > div.negative');
+
+			$positive_qualities.empty();
+			data.qualities.positive.forEach(function(quality)
+			{
+				var $quality = render.get_template('edit_quality').appendTo($positive_qualities);
+				$quality.find('.quality').html(quality);
+				$quality.find('button').prop('quality_name', quality).prop('quality', 'positive');
+				$quality.find('button').button();
+
+				// Need to skip some special qualities: 'Adept' and 'Magician (Hermetic)'
+				// If either one is present, they can't be edited or deleted
+				if (quality === 'Adept' || quality === 'Magician (Hermetic)')
+					$quality.find('button').detach();
+			});
+
+			$new_quality = $('<div/>').appendTo($positive_qualities);
+			$select = $('<select name="quality_name"/>').prop('quality', 'positive').appendTo($new_quality);
+			$select.append($('<option/>'));
+
+			all_qualities.positive.forEach(function(quality)
+			{
+				if (!data.qualities.positive.includes(quality))
+				{
+					$select.append($('<option value="' + quality + '"/>').html(quality));
+				}
+			});
+
+			$negative_qualities.empty();
+			data.qualities.negative.forEach(function(quality)
+			{
+				var $quality = render.get_template('edit_quality').appendTo($negative_qualities);
+				$quality.find('.quality').html(quality);
+				$quality.find('button').prop('quality_name', quality).prop('quality', 'negative');
+				$quality.find('button').button();
+			});
+
+			$new_quality = $('<div/>').appendTo($negative_qualities);
+			$select = $('<select name="quality_name"/>').prop('quality', 'negative').appendTo($new_quality);
+			$select.append($('<option/>'));
+
+			all_qualities.negative.forEach(function(quality)
+			{
+				if (!data.qualities.negative.includes(quality))
+				{
+					$select.append($('<option value="' + quality + '"/>').html(quality));
+				}
+			});
+		};
+
+		$mook.find('.other_information .qualities > div.quality').on('change', 'select[name="quality_name"]', function()
+		{
+			var quality = $(this).prop('quality');
+			if ($(this).val().length !== 0)
+				data.qualities[quality].push($(this).val());
+
+			redraw_qualities();
+		});
+
+		$mook.find('.other_information .qualities > div.quality').on('click', 'button.remove_quality', function()
+		{
+			var quality = $(this).prop('quality'), remove = $(this).prop('quality_name'), i = data.qualities[quality].indexOf(remove);
+			data.qualities[quality].splice(i, 1);
+
+			redraw_qualities();
+		});
+
+		redraw_qualities();
+
+		// Skills
+		var redraw_skills = function()
+		{
+			var $skill_div = $mook.find('.other_information .skills > div.value'), current_skills, all_skills;
+
+			$skill_div.empty();
+
+			current_skills = Object.keys(data.skills);
+
+			current_skills.forEach(function(skill)
+			{
+				var $skill = render.get_template('edit_skill').appendTo($skill_div);
+
+				$skill.find('.skill').html(skill);
+				$skill.find('select[name="skill_rating"]').prop('skill_name', skill);
+				$skill.find('button').prop('skill_name', skill);
+				$skill.find('button').button();
+
+				for (var i = 1; i <= 12; i++)
+				{
+					var $option = $('<option value="' + i + '"/>').html(i).appendTo($skill.find('select[name="skill_rating"]'));
+
+					if (data.skills[skill] === i)
+						$option.prop('selected', true);
+				}
+			});
+
+			var $skill = $('<div/>').appendTo($skill_div);
+			var $select = $('<select name="skill_name"/>').appendTo($skill);
+			$select.append($('<option/>'));
+
+			all_skills = db.get_skill_list();
+
+			all_skills.forEach(function(skill)
+			{
+				if (!current_skills.includes(skill))
+				{
+					$select.append($('<option value="' + skill + '"/>').html(skill));
+				}
+			});
+		};
+
+		$mook.find('.other_information .skills > div.value').on('change', 'select[name="skill_name"]', function(e)
+		{
+			if ($(this).val().length !== 0)
+				data.skills[$(this).val()] = 1;
+
+			redraw_skills();
+		});
+
+		$mook.find('.other_information .skills > div.value').on('change', 'select[name="skill_rating"]', function(e)
+		{
+			data.skills[$(this).prop('skill_name')] = parseInt($(this).val());
+
+			redraw_skills();
+		});
+
+		$mook.find('.other_information .skills > div.value').on('click', 'button.remove_skill', function(e)
+		{
+			var remaining_skills = {}, current_skills = Object.keys(data.skills), remove_skill = $(this).prop('skill_name');
+
+			current_skills.forEach(function(skill)
+			{
+				if (remove_skill !== skill)
+					remaining_skills[skill] = data.skills[skill];
+			});
+
+			data.skills = remaining_skills;
+
+			redraw_skills();
+		});
+
+		redraw_skills();
+
+		// Augmentations
+		// TODO
+
+		// Armor
+		// TODO
+
+		// Weapons
+		// TODO
+
+		// Gear
+		// TODO
+
+		// Commlink
+		// TODO
 	},
 
 	mook_for_action: function($target, data, options)
@@ -1856,6 +2296,9 @@ var render = {
 
 		$mook.find('.controls button.edit').click(function()
 		{
+			// if (!options.hasOwnProperty('view_after_save'))
+			// 	options.view_after_save = 'action';
+
 			render.mook_for_edit($target, data, options);
 		});
 
@@ -2282,7 +2725,7 @@ var render = {
 			if (entry.ap !== 0)
 				entry_text.push('AP ' + entry.ap);
 
-			$gear = render.get_template('weapon').appendTo($mook.find('.information .gear .value'));
+			$gear = render.get_template('display_weapon').appendTo($mook.find('.information .gear .value'));
 
 			$gear.find('.stats').html(entry.name + ' [' + entry_text.join(', ') + ']');
 
@@ -2350,7 +2793,7 @@ var render = {
 			if (entry.ap !== 0)
 				entry_text.push('AP ' + entry.ap);
 
-			$gear = render.get_template('weapon').appendTo($mook.find('.information .gear .value'));
+			$gear = render.get_template('display_weapon').appendTo($mook.find('.information .gear .value'));
 
 			$gear.find('.stats').html(entry.name + ' [' + entry_text.join(', ') + ']');
 
@@ -2425,7 +2868,7 @@ var render = {
 				entry_text.push('w/' + entry.ammo_type + ' ammo');
 
 			// gear.push('<div>' + entry.name + ' [' + entry_text.join(', ') + ']</div>');
-			$gear = render.get_template('weapon').appendTo($mook.find('.information .gear .value'));
+			$gear = render.get_template('display_weapon').appendTo($mook.find('.information .gear .value'));
 
 			$gear.find('.stats').html(entry.name + ' [' + entry_text.join(', ') + ']');
 
@@ -3151,6 +3594,9 @@ var render = {
 
 		$mook.find('.controls button.edit').click(function()
 		{
+			// if (!options.hasOwnProperty('view_after_save'))
+			// 	options.view_after_save = 'display';
+
 			render.mook_for_edit($target, data, options);
 		});
 	},
@@ -3372,7 +3818,7 @@ var render = {
 			$mark.attr('id', i);
 			$mark.click(function()
 			{
-				wp.penalty = parseInt($(this).prop('penalty'), 10);
+				wp.penalty = parseInt($(this).prop('penalty'));
 				if (isNaN(wp.penalty))
 					wp.penalty = 0;
 				$cm.find('.penalty').html('Penalty: ' + wp.penalty);
@@ -3435,7 +3881,7 @@ var render = {
 			$mark.attr('id', i);
 			$mark.click(function()
 			{
-				wp.physical = parseInt($(this).prop('penalty'), 10);
+				wp.physical = parseInt($(this).prop('penalty'));
 				if (isNaN(wp.physical))
 					wp.physical = 0;
 				wp.penalty = wp.physical + wp.stun;
@@ -3481,7 +3927,7 @@ var render = {
 			$mark.attr('id', i);
 			$mark.click(function()
 			{
-				wp.stun = parseInt($(this).prop('penalty'), 10);
+				wp.stun = parseInt($(this).prop('penalty'));
 				if (isNaN(wp.stun))
 					wp.stun = 0;
 				wp.penalty = wp.physical + wp.stun;
@@ -3603,7 +4049,7 @@ var storage = {
 	// Return the currently displayed tab ID
 	get_current_cast_tab: function()
 	{
-		return parseInt(localStorage.cast_current_tab, 10);
+		return parseInt(localStorage.cast_current_tab);
 	},
 
 	// Set which tab we are viewing now
@@ -3677,18 +4123,17 @@ var storage = {
 
 	generate_character_id: function()
 	{
-		var id = parseInt(localStorage.cast_character_id, 10) + 1;
+		var id = parseInt(localStorage.cast_character_id) + 1;
 		localStorage.cast_character_id = id;
 		return id;
 	},
 
 	generate_cast_tab_id: function()
 	{
-		var id = parseInt(localStorage.cast_tab_id, 10) + 1;
+		var id = parseInt(localStorage.cast_tab_id) + 1;
 		localStorage.cast_tab_id = id;
 		return id;
 	},
-
 
 	get_characters: function()
 	{
@@ -3703,6 +4148,7 @@ var storage = {
 	set_character: function(data)
 	{
 		var cast_characters = JSON.parse(localStorage.cast_characters), new_char = false;
+		var updated_cast = [];
 
 		if (!data.hasOwnProperty('character_id'))
 		{
@@ -3713,14 +4159,20 @@ var storage = {
 		if (new_char)
 		{
 			cast_characters.push(data);
+			updated_cast = cast_characters;
 		}
 		else
 		{
-			// TODO need to find my existing entry and overwrite it
-			debugger;
+			cast_characters.forEach(function(char)
+			{
+				if (char.character_id === data.character_id)
+					updated_cast.push(data);
+				else
+					updated_cast.push(char);
+			});
 		}
 
-		localStorage.cast_characters = JSON.stringify(cast_characters);
+		localStorage.cast_characters = JSON.stringify(updated_cast);
 
 		return data;
 	},
@@ -3982,12 +4434,12 @@ function view_generator()
 	{
 		var options = {};
 
-		if ($('.main_content #minion_generator input[name="name"]').val())
+		if ($('.main_content #minion_generator .entry_form input[name="name"]').val())
 		{
-			options['name'] = $('.main_content #minion_generator input[name="name"]').val();
+			options['name'] = $('.main_content #minion_generator .entry_form input[name="name"]').val();
 		}
 
-		$('.main_content #minion_generator select').each(function ()
+		$('.main_content #minion_generator .entry_form select').each(function ()
 		{
 			var option = $(this).attr('name');
 
@@ -4263,6 +4715,6 @@ function setup_controls()
 	}
 }
 
-var build_id = '0.5';
+var build_id = '0.6';
 
 var download_url = 'https://github.com/toktic/sr_gmt';

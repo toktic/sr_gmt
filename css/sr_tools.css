@@ -49,7 +49,14 @@ body{
 
 
 
+.big_button
+{
+	padding: 5px;
+}
 
+.big_button:hover
+{
+}
 
 .smaller_button
 {
@@ -62,7 +69,6 @@ body{
 {
 	font-weight: normal;
 }
-
 
 .tiny_button
 {
@@ -255,6 +261,7 @@ div[template_holder]
 {
 	width: 650px;
 	margin-top: 20px;
+	margin-bottom: 20px;
 }
 
 .display_npc_wrapper
@@ -464,6 +471,48 @@ div[template_holder]
 	padding-left: 4px;
 	padding-right: 4px;
 }
+
+.edit_npc_wrapper .other_information
+{
+
+}
+
+.edit_npc_wrapper .other_information > div > label
+{
+	display: block;
+	padding-left: 2px;
+	color: #ccee00;
+	font-weight: bold;
+}
+
+.edit_npc_wrapper .other_information .condition_monitor > div,
+.edit_npc_wrapper .other_information .wound_penalty > div
+{
+	padding-left: 5px;
+}
+
+.edit_npc_wrapper .other_information .skills
+{
+
+}
+
+.edit_npc_wrapper .other_information .skills .value
+{
+
+}
+
+.edit_npc_wrapper .other_information .skills .value .skill
+{
+	width: 40%;
+	display: inline-block;
+}
+
+.edit_npc_wrapper .other_information .qualities div.quality span.quality
+{
+	width: 40%;
+	display: inline-block;
+}
+
 
 
 
