@@ -117,9 +117,9 @@
 	<div template="cast_of_shadows">
 		<div class="cast_of_shadows">
 			<ul class="cast_tabs">
-				<li><a href="#introduction">Introduction</a></li>
+				<li tab_id="0"><a href="#cast_management">Cast Management</a></li>
 			</ul>
-			<div id="introduction">
+			<div id="cast_management">
 				<div>Welcome to your cast of shadows! This section needs more filler. It should include notes about how there is a system tab with all characters and you can't delete it.</div>
 
 				<div>You can edit tab names and rearrange them here.</div>
@@ -463,6 +463,15 @@
 				</div>
 			</div>
 
+			<div class="dodge">
+				<label>Dodge Roll</label>
+				<div class="rollable">
+					<div class="value"></div>
+					<button class="tiny_button display"><span title="Roll" class="ui-icon ui-icon-seek-next"></span></button>
+					<div class="result"></div>
+				</div>
+			</div>
+
 			<div class="damage_resistance">
 				<label>Damage Resistance</label>
 				<div class="rollable">
@@ -609,54 +618,40 @@
 				<label>Skills</label>
 				<div class="value"></div>
 			</div>
-
-
-
-
-
 			<div class="augments">
 				<label>Augmentations</label>
 				<div class="value"></div>
 			</div>
-
-
-
-
-
-
 			<div class="armor">
 				<label>Armor</label>
-				<div class="value"></div>
+				<div class="value">
+					<select name="armor"></select>
+				</div>
 			</div>
-
-
-
-
-
 
 			<div class="weapons">
 				<label>Weapons</label>
 				<div class="value"></div>
 			</div>
 
-
 			<div class="gear">
 				<label>Gear</label>
 				<div class="value"></div>
 			</div>
 
-
-
 			<div class="commlink">
 				<label>Commlink</label>
-				<div class="value"></div>
+				<div class="value">
+					<select name="commlink">
+						<option value="1">Meta Link</option>
+						<option value="2">Sony Emperor</option>
+						<option value="3">Renraku Sensei</option>
+						<option value="4">Erika Elite</option>
+						<option value="5">Hermes Ikon</option>
+						<option value="6">Transys Avalon</option>
+					</select>
+				</div>
 			</div>
-
-
-
-
-
-
 		</div>
 	</div>
 
@@ -690,13 +685,29 @@
 
 	<div template="edit_skill">
 		<span class="skill"></span>
-		<select name="skill_rating"></select>
+		<div class="skill_rating"><select name="skill_rating"></select></div>
 		<button class="tiny_button remove_skill"><span title="Remove Skill" class="ui-icon ui-icon-close"></span></button>
 	</div>
 
 	<div template="edit_quality">
 		<span class="quality"></span>
 		<button class="tiny_button remove_quality"><span title="Remove Quality" class="ui-icon ui-icon-close"></span></button>
+	</div>
+
+	<div template="edit_augmentation">
+		<span class="augmentation"></span>
+		<div class="augmentation_rating"><select name="augmentation_rating"></select></div>
+		<button class="tiny_button remove_augmentation"><span title="Remove Skill" class="ui-icon ui-icon-close"></span></button>
+	</div>
+
+	<div template="edit_weapon">
+		<span class="weapon"></span>
+		<button class="tiny_button remove_weapon"><span title="Remove Weapon" class="ui-icon ui-icon-close"></span></button>
+	</div>
+
+	<div template="edit_gear">
+		<span class="gear"></span>
+		<button class="tiny_button remove_gear"><span title="Remove Gear" class="ui-icon ui-icon-close"></span></button>
 	</div>
 
 	<div template="display_weapon">
@@ -713,9 +724,32 @@
 
 	<div template="cast__full_list_entry">
 		<div class="entry"></div>
-		<div class="remove">
+		<div class="tools">
 			<button class="delete_cast_member"><span title="Delete" class="ui-icon ui-icon-circle-close"></span></button>
-			<div class="dialog">Are you sure you want to delete this character? Removing it here will also remove it from all other tabs. This is perma-death.</div>
+
+			<div class="add_to_tab">
+				<div>
+					<span>Add NPC to tab:</span>
+					<select name="tab_name"></select>
+				</div>
+				<button class="add_npc"><span title="Just Add">Add NPC</span></button>
+				<button class="add_npc_and_switch"><span title="Add &amp; Switch">Add &amp; Switch Tabs</span></button>
+			</div>
+
+			<div class="delete_dialog">Are you sure you want to delete this character? Removing it here will also remove it from all other tabs. This is perma-death.</div>
+			<div class="tab_delete_dialog">Are you sure you want to remove this character? This only removes the NPC from the current tab.</div>
+		</div>
+	</div>
+
+	<div template="cast__tab_list" class="cast__tab_list">
+		<div list></div>
+	</div>
+
+	<div template="cast__tab_list_entry">
+		<div class="entry"></div>
+		<div class="tools">
+			<button class="delete_cast_member"><span title="Delete" class="ui-icon ui-icon-circle-close"></span></button>
+			<div class="dialog">Remove this character from this tab? This character can still be found in the full cast.</div>
 		</div>
 	</div>
 </div>

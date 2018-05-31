@@ -498,7 +498,7 @@ div[template_holder]
 
 .edit_npc_wrapper .other_information .skills .value
 {
-
+	padding-left: 5px;
 }
 
 .edit_npc_wrapper .other_information .skills .value .skill
@@ -507,14 +507,49 @@ div[template_holder]
 	display: inline-block;
 }
 
+.edit_npc_wrapper .other_information .skills .value div.skill_rating
+{
+	width: 7%;
+	display: inline-block;
+}
+
+.edit_npc_wrapper .other_information .skills .value button
+{
+	vertical-align: text-bottom;
+}
+
+.edit_npc_wrapper .other_information .qualities div.quality
+{
+	padding-left: 5px;
+}
+
 .edit_npc_wrapper .other_information .qualities div.quality span.quality
 {
 	width: 40%;
 	display: inline-block;
 }
 
+.edit_npc_wrapper .other_information .augments .value
+{
+	padding-left: 5px;
+}
 
+.edit_npc_wrapper .other_information .augments .value .augmentation
+{
+	width: 40%;
+	display: inline-block;
+}
 
+.edit_npc_wrapper .other_information .augments .value div.augmentation_rating
+{
+	width: 7%;
+	display: inline-block;
+}
+
+.edit_npc_wrapper .other_information .augments .value button
+{
+	vertical-align: text-bottom;
+}
 
 .cast_of_shadows
 {
@@ -562,7 +597,34 @@ div[template_holder]
 	flex: 1 0 500px;
 }
 
-.cast_of_shadows .cast__full_list > div[list] > div > .remove
+.cast_of_shadows .cast__full_list > div[list] > div > .tools
+{
+	flex: 2 0 200px;
+	padding-left: 10px;
+}
+
+.cast_of_shadows .cast__full_list > div[list] > div > .tools .add_to_tab
+{
+	padding-left: 4px;
+}
+
+.cast_of_shadows .cast__full_list > div[list] > div > .tools .add_to_tab > div
+{
+	padding: 6px 0;
+}
+
+.cast_of_shadows .cast__tab_list > div[list] > div
+{
+	display: flex;
+	margin-bottom: 10px;
+}
+
+.cast_of_shadows .cast__tab_list > div[list] > div > .entry
+{
+	flex: 1 0 500px;
+}
+
+.cast_of_shadows .cast__tab_list > div[list] > div > .tools
 {
 	flex: 2 0 200px;
 	padding-left: 10px;
