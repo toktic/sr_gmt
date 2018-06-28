@@ -1,6 +1,7 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="us">
 <head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 	<meta charset="utf-8">
 	<title>Shadowrun GM Tools</title>
 	<link href="css/jquery-ui.css" rel="stylesheet">
@@ -8,6 +9,11 @@
 	<script src="js/jquery.js"></script>
 	<script src="js/jquery-ui.js"></script>
 	<script src="js/sr_tools.js"></script>
+	<script src="js/sr_tools_db.js"></script>
+	<script src="js/sr_tools_gen.js"></script>
+	<script src="js/sr_tools_render.js"></script>
+	<script src="js/sr_tools_roll.js"></script>
+	<script src="js/sr_tools_storage.js"></script>
 	<script>
 		$(function()
 		{
@@ -94,18 +100,33 @@
 
 <div class="main_content"></div>
 
-
 <div template_holder>
-	<div template="main_screen">
-		Main Screen turn on!
+	<div template="main_screen" class="intro_screen">
+		<div>Welcome to my Shadowrun GM Tools!</div>
+
+		<p>This utility was created as a set of tools for Shadowrun game masters. It started as a way of generating extra NPCs for combat-heavy runs, and as a thought exercise in how to expand the list of grunts in the Core Rulebook to more situations. The intent was to include generators and lists that would make it easier for game masters to get mechanics out of the way and spend more time telling stories. My hope was that this will eventually make it easy for game masters to generate an entire session of entertainment with the click of a few buttons.</p>
+
+		<p>It is divided into several sections, all of which can be accessed by the buttons on the left. There is also a dice-simulator at the top to let you quickly simulate a fist-full of dice. Remember, as a GM you don't have to be honest with how many successes or failures you "rolled"...</p>
+
+		<ul>
+			<li>The first section is <b>Cast of Shadows</b>. This holds the full assortment of npcs that you create and save for use later. The "Full Cast" lists all saved cast members. You can create plenty of custom tabs and list only the cast members you need for a scene on that tab.</li>
+			<li>Next up is the <b>NPC Generator</b>. You can use the tabs within to create a single NPC or a horde of them. Just be aware that if you create one and don't save them to the <b>Cast of Shadows</b>, they will disappear and be lost.</li>
+			<li><b>Settings</b> has a selection of, you guessed it, Settings that you can change. This also has a Nuke button if you want to delete all of your saved information and start over from scratch.</li>
+		</ul>
+
+		<p>This has also served as a creative outlet for programming for my own enjoyment. I have spent quite a few hours on this utility in the name of fun. There was never any intention of turning this into a money-generating enterprise. I don't want to deal with the legal or infrastructure headaches. Though if you happen to find me at a convention and want to say thanks, you can buy me a beer at GenCon. If you want to complain or sue me, I don't exist and don't attend GenCon. :D</p>
+
+		<p>On data-retention: I use a piece of web programming functionality called Local Storage that act a little bit like cookies. The data is stored in your browser's cache for you for that browser. I have to specify both of those because it's not shared to other users on your computer, nor even other browsers. It certainly isn't shared to other computers, and I don't have access to it at all. So if you spend the time to create and save a cast of shadow denizens, make sure you create it on the computer you're bringing to the game session. Or print them out, that works too!</p>
+
+		<p>As with many side projects, there is a whole list of things I want to add to this utility. There are plenty of features that I haven't had the time to add yet. Since I'm not getting paid to work on this, it only happens when I do have spare time that isn't being spent on other things. And there will eventually come a time that I wash my hands of this and let it sit on a shelf to die from neglect. It may not be a nice thing to say, but it's the truth. This utility isn't meant to be a replacement for the Shadowrun books, either. I make an assumption that users are familiar with the basics of Shadowrun, from what an Adept is to what constitutes a Mr. Johnson, and are able to look things up as needed, like specific equipment information. It is meant as a supplement and assistant, much like how HeroLab and Chummer make PC creation easier for runners. I will not try to make this fully comprehensive and cover every possible option. There are too many source books to keep up with and this isn't meant to be a replacement for sourcebooks.</p>
+
+		<p>Have fun with this tool! It is meant to be used and intended to make your life easier as a GM. Speaking of which, always try to offer your players the chance to make a deal with a dragon.</p>
+
+		<div class="legalese">The Topps Company, Inc. has sole ownership of the names, logo, artwork, marks, photographs, sounds, audio, video and/or any proprietary matrial used in connection with the game Shadowrun.<br />The Topps Company, Inc. has granted permission to this utility to use such names, logos, artwork, marks and/or any proprietary materials for promotional and informational purposes on its website but does not endorse, and is not affiliated with this utility in any official capacity whatsoever.<br />Original content in this utility is licensed under the Creative Commons Attribution International License. So if you use anything here, please give credit where it is due.<br />It is provided "as is" and any warranties are disclaimed. In no event shall the copyright holder or contributors be liable for damage however they are caused. Don't be a jerk!</div>
 
 		<div class="build_mismatch_nuke_storage">
-			<p>
-				The software version you are running does not match the stored data's version which will cause issues. Do you want to delete the local stored data and start from scratch?
-			</p>
-			<p>
-				Alternately, look at the stored data version and grab that version of code instead.
-			</p>
+			<p>The software version you are running does not match the stored data's version which will cause issues. Do you want to delete the local stored data and start from scratch?</p>
+			<p>Alternately, look at the stored data version and grab that version of code instead.</p>
 			<ul>
 				<li software_version>a</li>
 				<li stored_version>b</li>
@@ -117,12 +138,10 @@
 	<div template="cast_of_shadows">
 		<div class="cast_of_shadows">
 			<ul class="cast_tabs">
-				<li tab_id="0"><a href="#cast_management">Cast Management</a></li>
+				<li tab_id="0"><a href="#0" tab_id="0">Cast Management</a></li>
 			</ul>
-			<div id="cast_management">
-				<div>Welcome to your cast of shadows! This section needs more filler. It should include notes about how there is a system tab with all characters and you can't delete it.</div>
-
-				<div>You can edit tab names and rearrange them here.</div>
+			<div id="0">
+				<div>Welcome to your cast of shadows! You can edit tab names and rearrange them here.</div>
 
 				<div class="spacer_40"></div>
 
@@ -186,17 +205,22 @@
 		</div>
 	</div>
 
-	<div template="minion_generator_section">
-		<div class="overview">
-			<p>Welcome to the Minion Generator section of SR:GM Tools. Here I want to put some introduction to what's going on.</p>
-			<p>When generating a NPC, there are several categories and overall options you can choose from or leave it all up to chance. After the NPC is created, you can further edit them in the <b>Cast of Shadows</b> section.</p>
-			<p>Generating a group of NPCs works similarly, defining only broad strokes here and letting you individually refine the NPCs later.</p>
-		</div>
+	<div template="minion_generator_section" class="minion_generator_section">
 		<div class="section_tabs">
 			<ul>
+				<li><a href="#overview">Generator Overview</a></li>
 				<li><a href="#minion_generator">Individual NPC Generator</a></li>
 				<li><a href="#mob_generator">Group of NPCs Generator</a></li>
 			</ul>
+			<div id="overview">
+				<div class="intro">The NPC Generator is the concept that kicked off the creation of these tools. Here, you can easily create a bunch of thugs to harass the party or a high-powered HTR team to flush them out of a corp building.</div>
+				<div class="intro">When generating a single NPC, there are several categories and overall options you can choose from or leave it all up to chance. After the NPC is created, you can save them in the <b>Cast of Shadows</b> section. They can also be edited both immediately or later. However, they are not saved until they have been added to the <b>Cast of Shadows</b>.</div>
+				<div class="intro">Generating a group of NPCs works similarly, defining only broad strokes here and letting you individually refine the NPCs later.</div>
+				<div class="intro">Generating one of the <i>Special Types</i> only happens if you choose the option for it.</div>
+				<div class="intro">These NPCs use the sample grunts in the Core Rulebook as guidelines. They aren't meant to be perfect nor even optimal. Attributes and skill ranks are an approximation of what I considered reasonably good for a given profession and power level. Feel free to take all of these with a grain of salt.</div>
+				<button class="generate_mook">Generate one NPC</button>
+				<button class="generate_mob">Generate a group</button>
+			</div>
 			<div id="minion_generator">
 				<div class="entry_form">
 					<div class="input_row">
@@ -247,7 +271,7 @@
 							<option value="thug">Thugs & Protesters</option>
 							<option value="ganger">Gang Member</option>
 							<option value="corpsec">Corporate Security</option>
-							<option value="police">Police (KE & LS)</option>
+							<option value="police">Law Enforcement</option>
 							<option value="mob">Organized Crime</option>
 							<option value="cultist">Cultists & Politicos</option>
 							<option value="htr">High Threat Response</option>
@@ -280,15 +304,100 @@
 				</div>
 			</div>
 			<div id="mob_generator">
-				<!--
-				Options:
-				Number of mobs
-				Professional Rating
-				Professional Type
-				All same race (default no)
-				All same gender (default no, options of 'no', male, female)
-				-->
-				<p>Big Form Here</p>
+				<div class="entry_form">
+					<div class="input_row">
+						<label equalize>Mob Name</label>
+						<input name="name" placeholder="Random Mob"/>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Number</label>
+						<select name="number">
+							<option value="two_four">2 - 4 npcs</option>
+							<option value="three_six">3 - 6 npcs</option>
+							<option value="four_ten">4 - 10 npcs</option>
+						</select>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Race</label>
+						<select name="race">
+							<option value="">- Individually Random</option>
+							<option value="Human">All Human</option>
+							<option value="Elf">All Elf</option>
+							<option value="Dwarf">All Dwarf</option>
+							<option value="Ork">All Ork</option>
+							<option value="Troll">All Troll</option>
+						</select>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Gender</label>
+						<select name="gender">
+							<option value="">- Individually Random</option>
+							<option value="Male">All Male</option>
+							<option value="Female">All Female</option>
+						</select>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Professional Rating</label>
+						<select name="professional_rating">
+							<option value="group">- Group Random</option>
+							<option value="">- Individually Random</option>
+							<option value="0">0</option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+						</select>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Professional Type</label>
+						<select name="professional_type">
+							<option value="group">- Group Random</option>
+							<option value="">- Individually Random</option>
+							<option value="civilian">Civilian</option>
+							<option value="thug">Thugs & Protesters</option>
+							<option value="ganger">Gang Member</option>
+							<option value="corpsec">Corporate Security</option>
+							<option value="police">Law Enforcement</option>
+							<option value="mob">Organized Crime</option>
+							<option value="cultist">Cultists & Politicos</option>
+							<option value="htr">High Threat Response</option>
+							<option value="specops">Special Operations</option>
+						</select>
+					</div>
+
+					<div class="input_row">
+						<label equalize>Special Types</label>
+						<div class="add_special_types">
+							<label for="special_lieutenant">Add Lieutenant</label>
+							<input type="checkbox" name="special_lieutenant" id="special_lieutenant">
+							<label for="special_decker">Add Decker</label>
+							<input type="checkbox" name="special_decker" id="special_decker">
+							<label for="special_adept">Add Physical Adept</label>
+							<input type="checkbox" name="special_adept" id="special_adept">
+							<label for="special_magician">Add Hermetic Magician</label>
+							<input type="checkbox" name="special_magician" id="special_magician">
+						</div>
+					</div>
+
+					<div class="spacer_20"></div>
+
+					<button id="generate_mob">Generate Group</button>
+
+					<div id="generated_results"></div>
+
+					<button id="discard_minion">Discard All</button>
+
+					<button id="add_to_cast">Add all to Cast</button>
+
+					<span id="add_to_cast_tab"></span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -717,8 +826,8 @@
 	</div>
 
 	<div template="cast__full_list" class="cast__full_list">
-		<p>I probably should have some full explanation here. It would be helpful and stuff</p>
-
+		<div class="empty_message">You do not have any denizens saved to your Cast of Shadows. Nothing to see here, move along.</div>
+		<div class="cast_message">This is a full list of all denizens that you have added to your Cast of Shadows.</div>
 		<div list></div>
 	</div>
 

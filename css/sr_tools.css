@@ -172,6 +172,19 @@ body{
 	color: #fff;
 }
 
+.main_content .intro_screen
+{
+	padding-right: 25%;
+	padding-bottom: 20px;
+}
+
+.main_content .intro_screen .legalese
+{
+	color: #ddd;
+	font-style: italic;
+	margin-top: 40px;
+}
+
 div[template_holder]
 {
 	display: none;
@@ -246,6 +259,15 @@ div[template_holder]
 	height: 45px;
 }
 
+.minion_generator_section
+{
+	padding-right: 25px;
+}
+
+.minion_generator_section #overview .intro:not(:first-child)
+{
+	margin-top: 10px;
+}
 
 #minion_generator
 {
@@ -262,6 +284,35 @@ div[template_holder]
 	width: 650px;
 	margin-top: 20px;
 	margin-bottom: 20px;
+}
+
+#mob_generator .entry_form .input_row > label[equalize]
+{
+	vertical-align: top;
+}
+
+#mob_generator .entry_form #generated_results
+{
+	width: 650px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+#mob_generator .entry_form #generated_results .mob_entry:not(:first-child)
+{
+	margin-top: 10px;
+}
+
+#mob_generator .entry_form .add_special_types
+{
+	display: inline-block;
+}
+
+#mob_generator .entry_form .add_special_types label
+{
+	font-size: 0.75em;
+	display: block;
+	text-align: left;
 }
 
 .display_npc_wrapper
@@ -549,6 +600,11 @@ div[template_holder]
 .edit_npc_wrapper .other_information .augments .value button
 {
 	vertical-align: text-bottom;
+}
+
+.cast_wrapper
+{
+	padding-right: 25px;
 }
 
 .cast_of_shadows
