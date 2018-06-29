@@ -894,19 +894,18 @@ function setup_controls()
 		update_results_text(addition);
 	});
 
-	var results_text = '';
-
-	$('textarea#roll_results').html(results_text);
+	$('textarea#roll_results').html('');
 
 	function update_results_text(text)
 	{
-		results_text = results_text + "\n" + text;
+		var $results = $('.top_bar_roller #roll_results');
+		var results_text = $results.val() + "\n" + text;
+		
+		$results.val(results_text);
 
-		$('textarea#roll_results').html(results_text);
-
-		if ($('textarea#roll_results').length)
+		if ($results.val().length)
 		{
-			$('textarea#roll_results').scrollTop($('textarea#roll_results')[0].scrollHeight - $('textarea#roll_results').height());
+			$results.scrollTop($results[0].scrollHeight - $results.height());
 		}
 
 		$('.top_bar .numbers button').blur();
