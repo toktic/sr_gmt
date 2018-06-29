@@ -724,7 +724,7 @@ var db = {
 			if (rating > 4)
 			{
 				res.gear.push({
-					name: 'Power focus (Combat)',
+					name: 'Power focus',
 					magic_focus: true,
 					rating: rating - 3
 				});
@@ -1650,7 +1650,7 @@ var db = {
 
 			// Willpower based skills
 			case 'Astral Combat':
-				data.attribute = 'willpower';
+				data.attribute = 'will';
 				data.limit = 'astral';
 				break;
 

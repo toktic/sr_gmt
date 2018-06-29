@@ -9,11 +9,8 @@ var render = {
 		}
 
 		options = $.extend({}, {
-			mode: 'display' // TODO revert to display
+			mode: 'display'
 		}, options);
-
-		// TODO remove
-		console.log('render.mook()', data);
 
 		switch (options.mode)
 		{
@@ -47,24 +44,28 @@ var render = {
 			view_after_save: 'action'
 		}, options);
 
+		var original_data = $.extend({}, data);
+
 		$target.empty().append($mook);
 
 		// Add buttons to enter other modes
 		$mook.find('button').button();
 
-		$mook.find('.controls button.action').click(function()
-		{
-			render.mook_for_action($target, data, options);
-		});
-
-		$mook.find('.controls button.display').click(function()
-		{
-			render.mook_for_display($target, data, options);
-		});
-
 		$mook.find('.controls button.revert').click(function()
 		{
-			render.mook_for_edit($target, data, options);
+			switch (options.view_after_save)
+			{
+				case 'action':
+					render.mook_for_action($target, original_data, options);
+					break;
+
+				case 'display':
+					render.mook_for_display($target, original_data, options);
+					break;
+
+				default:
+					console.log('ERROR: mook_for_edit() revert with unknown mode', options.view_after_save);
+			}
 		});
 
 		var save_mook = function()
@@ -90,6 +91,28 @@ var render = {
 			{
 				data.race = $mook.find('select[name="race"]').val().trim();
 				changes_made = true;
+			}
+
+			// If not a Troll, make sure they don't have Dermal Deposits
+			if (data.race !== 'Troll')
+			{
+				data.augmentations = data.augmentations.filter(function (aug)
+				{
+					return aug.name !== 'Troll Dermal Deposits';
+				});
+			}
+			else
+			{
+				// If this troll doesn't have skin augmentations, make sure they have standard Troll hide
+				var has_troll_skin = data.augmentations.find(function (aug)
+				{
+					return aug.name === 'Troll Dermal Deposits';
+				});
+
+				if (!has_troll_skin)
+				{
+					data.augmentations.push({name: 'Troll Dermal Deposits'});
+				}
 			}
 
 			// Attributes
@@ -177,13 +200,46 @@ var render = {
 			$mook.find('.attribute_values select[name="attribute_' + attribute + '"] option[value="' + data.attributes[attribute] + '"]').prop('selected', true);
 		});
 
-		// TODO if they didn't start out as a mage or adept, remove the Magic score
-		// just deal with Magic separately
-		// also deal with `initiate` value, since that should be editable. And can go from 0-6
-		// Thankfully, as of this writing we only have Initiates for Adepts, not for actual Mages.
-		//
-		// I might just need to dis-allow this. Changing an adept's Magic score means adjusting their power points.
-		// Sure, adjusting a mage would be easier, but still not easy.
+		var metatype_changed = function()
+		{
+			var differences = {
+				body: 0,
+				agility: 0,
+				reaction: 0,
+				strength: 0,
+				will: 0,
+				logic: 0,
+				intuition: 0,
+				charisma: 0
+			};
+			var attributes = Object.keys(differences);
+			var original_attributes = db.get_metatype_adjustment(data.race);
+			var updated_attributes = db.get_metatype_adjustment($mook.find('select[name="race"]').val());
+
+			attributes.forEach(function(attr)
+			{
+				differences[attr] = parseInt($mook.find('select[name="attribute_' + attr + '"]').val()) - original_attributes.min_attributes[attr];
+
+				var cap = updated_attributes.max_attributes[attr] - updated_attributes.min_attributes[attr];
+				if (differences[attr] > cap)
+					differences[attr] = cap;
+
+				$mook.find('.attribute_values .attribute_value.' + attr).empty();
+
+				var $select = $('<select name="attribute_' + attr + '"/>').appendTo($mook.find('.attribute_values .attribute_value.' + attr));
+
+				for (var i = updated_attributes.min_attributes[attr]; i <= updated_attributes.max_attributes[attr]; i++)
+				{
+					$select.append($('<option/>').html(i).attr('value', i))
+				}
+
+				$mook.find('.attribute_values select[name="attribute_' + attr + '"] option[value="' +(updated_attributes.min_attributes[attr] + differences[attr]) + '"]').prop('selected', true);
+			});
+		};
+
+		$mook.find('select[name="race"]').on('change', metatype_changed).change();
+
+		// Remove the Magic score, even if they have one
 		$mook.find('.attribute_names .magic, .attribute_names .initiate').hide();
 		$mook.find('.attribute_values .magic, .attribute_values .initiate').hide();
 
@@ -475,7 +531,11 @@ var render = {
 			redraw_augmentations();
 		});
 
-		redraw_augmentations();
+		// Don't let Mages or Adepts have augmentations
+		if (data.special.is_adept === true || data.special.is_mage === true)
+			$mook.find('.other_information .augments').hide();
+		else
+			redraw_augmentations();
 
 		// Armor
 		$('<option value=""/>').appendTo($mook.find('.other_information .armor select[name="armor"]'));
@@ -693,9 +753,7 @@ var render = {
 
 		$mook.find('.controls button.edit').click(function()
 		{
-			// if (!options.hasOwnProperty('view_after_save'))
-			// 	options.view_after_save = 'action';
-
+			options.view_after_save = 'action';
 			render.mook_for_edit($target, data, options);
 		});
 
@@ -878,7 +936,12 @@ var render = {
 		}
 
 		// Skills
-		var improved_skills = [], improved_rating = 0, $skill, skill, skill_data, skill_limit;
+		var improved_skills = [], improved_rating = 0, $skill, skill, skill_data, skill_limit, power_focus;
+
+		power_focus = data.gear.find(function (gear)
+		{
+			return gear.name === 'Power focus';
+		});
 
 		// TODO This only really accounts for 1 improved ability, but that's all that is generated right now
 		if (data.special.is_adept === true)
@@ -910,12 +973,14 @@ var render = {
 			$skill.prop('pool', (data.skills[skill] + augmented_attributes[skill_data.attribute]));
 			$skill.prop('limit', skill_data.limit);
 
-			if (skill_data.limit === 'magic')
-			{
-				$skill.prop('limit', augmented_attributes.magic);
-				skill_limit = augmented_attributes.magic;
+			// Magic-based skills
+			if (skill_data.limit === 'force')
+				$skill.prop('pool', (data.skills[skill] + data.special.Magic));
 
-				// TODO add in dice for Power Focus if applicable
+			if (skill_data.limit === 'force')
+			{
+				$skill.prop('limit', data.special.Magic);
+				skill_limit = data.special.Magic;
 			}
 			else if (skill_data.limit === 'gear')
 			{
@@ -941,6 +1006,11 @@ var render = {
 				var improved_skill_rating = data.skills[skill] + improved_rating;
 				$skill.prop('pool', data.skills[skill] + augmented_attributes[skill_data.attribute] + improved_rating);
 				$skill.find('.skill').html(skill + ' ' + data.skills[skill] + ' (' + improved_skill_rating + ') [' + skill_limit + ']');
+			}
+
+			if ((skill_data.limit === 'force' || skill_data.limit === 'astral') && power_focus !== undefined)
+			{
+				$skill.prop('pool', $skill.prop('pool') + power_focus.rating);
 			}
 
 			$skill.find('button').button().click(function ()
@@ -2013,9 +2083,7 @@ var render = {
 
 		$mook.find('.controls button.edit').click(function()
 		{
-			// if (!options.hasOwnProperty('view_after_save'))
-			// 	options.view_after_save = 'display';
-
+			options.view_after_save = 'display';
 			render.mook_for_edit($target, data, options);
 		});
 	},
