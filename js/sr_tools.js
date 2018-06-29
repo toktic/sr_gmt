@@ -251,7 +251,7 @@ function view_cast(show_intro)
 					$deletion_dialog.dialog('open');
 				});
 
-				// TODO add a line saying when the character was created
+				// TODO add a line saying when the character was created and when/if it was edited
 
 				$char_template.find('.add_to_tab').detach();
 			});
@@ -260,8 +260,6 @@ function view_cast(show_intro)
 		{
 			$tab.append($("<div/>").html(tab_info.name)).append("There are currently no NPCs on this tab.");
 		}
-
-		// asdfasdf
 
 		// Set the currently active cast tab
 		storage.set_current_cast_tab(tab_id);
@@ -392,22 +390,98 @@ function view_generator()
 
 			view_cast();
 		});
+
+		var $popup = render.get_template('add_dialog_single');
+		$popup.find('button').button();
+
+		var current_tabs = storage.get_cast_tabs();
+
+		// If there aren't additional tabs, remove the first part
+		if (current_tabs.length <= 1)
+		{
+			$popup.find('.existing_tab_wrapper').detach()
+		}
+		else
+		{
+			// Add the other tabs as options
+			for (var i = 0; i < current_tabs.length; i++)
+			{
+				if (current_tabs[i].tab_id !== 1)
+				{
+					$('<option/>').attr('value', current_tabs[i].tab_id).html(current_tabs[i].name).appendTo($popup.find('select[name="existing"]'));
+				}
+			}
+
+			// Set the save button to work
+			$popup.find('button[existing]').off('click').click(function()
+			{
+				var tab_id = parseInt($popup.find('select[name="existing"]').val());
+				var npc_data = storage.set_character(current_npc);
+				var tab_data = storage.get_cast_tab(tab_id);
+				tab_data.characters.push(npc_data.character_id);
+				storage.set_cast_tab(tab_id, tab_data);
+				storage.set_current_cast_tab(tab_id);
+				$popup.dialog('close');
+				view_cast();
+			});
+		}
+
+		// Set the save new button to work
+		$popup.find('button[new_tab]').off('click').click(function()
+		{
+			var tab_name = $popup.find('input[new_tab]').val(), tab_id;
+
+			if (tab_name === '')
+			{
+				return;
+			}
+
+			tab_id = storage.create_cast_tab(tab_name);
+			var tab_data = storage.get_cast_tab(tab_id);
+			var npc_data = storage.set_character(current_npc);
+			tab_data.characters.push(npc_data.character_id);
+			storage.set_cast_tab(tab_id, tab_data);
+			storage.set_current_cast_tab(tab_id);
+			$popup.dialog('close');
+			view_cast();
+		});
+
+		$popup.dialog({
+			autoOpen: false,
+			modal: true,
+			title: 'Add NPC to specific tab',
+			width: 500,
+			buttons: [
+				{
+					text: "Cancel",
+					click: function() {
+						$(this).dialog( "close" );
+					}
+				}
+			]
+		});
+
+		$template.find('#minion_generator #add_dialog').button('enable').off('click').click(function()
+		{
+			$popup.dialog('open');
+			$popup.find('select').selectmenu();
+		});
 	});
 
 	$template.find('#minion_generator #discard_minion').button('disable').click(function ()
 	{
 		$template.find('#minion_generator #generated_results').empty();
-
 		$template.find('#minion_generator #discard_minion').button('disable');
-
 		$template.find('#minion_generator #add_to_cast').button('disable');
+		$template.find('#minion_generator #add_dialog').button('disable');
 	});
 
 	$template.find('#minion_generator #add_to_cast').button('disable');
+	$template.find('#minion_generator #add_dialog').button('disable');
 
 	$template.find('#generate_mob').on('click', function()
 	{
-		var options = {}, i, mob_name = 'Mob #' + roll.dval(10) + roll.dval(10) + ':', mob = [], special;
+		var options = {}, i, mob_name = 'Mob #' + roll.dval(10) + roll.dval(10) + ':', mob = [], special, mook;
 
 		if ($('.main_content #mob_generator .entry_form input[name="name"]').val().trim())
 		{
@@ -466,7 +540,7 @@ function view_generator()
 
 		for (i = 0; i < mob_count; i++)
 		{
-			var mook = gen.mook($.extend({}, options));
+			mook = gen.mook($.extend({}, options));
 			mook.name = mob_name + ' ' + mook.name;
 			mob.push(mook);
 		}
@@ -475,7 +549,7 @@ function view_generator()
 		{
 			special = $.extend({}, options);
 			special.is_mage = true;
-			var mook = gen.mook(special);
+			mook = gen.mook(special);
 			mook.name = mob_name + ' ' + mook.name;
 			mob.push(mook);
 		}
@@ -483,7 +557,7 @@ function view_generator()
 		{
 			special = $.extend({}, options);
 			special.is_adept = true;
-			var mook = gen.mook(special);
+			mook = gen.mook(special);
 			mook.name = mob_name + ' ' + mook.name;
 			mob.push(mook);
 		}
@@ -491,7 +565,7 @@ function view_generator()
 		{
 			special = $.extend({}, options);
 			special.is_decker = true;
-			var mook = gen.mook(special);
+			mook = gen.mook(special);
 			mook.name = mob_name + ' ' + mook.name;
 			mob.push(mook);
 		}
@@ -499,7 +573,7 @@ function view_generator()
 		{
 			special = $.extend({}, options);
 			special.is_lt = true;
-			var mook = gen.mook(special);
+			mook = gen.mook(special);
 			mook.name = mob_name + ' ' + mook.name;
 			mob.push(mook);
 		}
@@ -527,22 +601,109 @@ function view_generator()
 
 			view_cast();
 		});
+
+		var $popup = render.get_template('add_dialog_mob');
+		$popup.find('button').button();
+
+		var current_tabs = storage.get_cast_tabs();
+
+		// If there aren't additional tabs, remove the first part
+		if (current_tabs.length <= 1)
+		{
+			$popup.find('.existing_tab_wrapper').detach()
+		}
+		else
+		{
+			// Add the other tabs as options
+			for (i = 0; i < current_tabs.length; i++)
+			{
+				if (current_tabs[i].tab_id !== 1)
+				{
+					$('<option/>').attr('value', current_tabs[i].tab_id).html(current_tabs[i].name).appendTo($popup.find('select[name="existing"]'));
+				}
+			}
+
+			// Set the save button to work
+			$popup.find('button[existing]').off('click').click(function()
+			{
+				var tab_id = parseInt($popup.find('select[name="existing"]').val());
+				var npc_data, tab_data;
+				tab_data = storage.get_cast_tab(tab_id);
+
+				for (i = mob.length - 1; i >= 0; i--)
+				{
+					npc_data = storage.set_character(mob[i]);
+					tab_data.characters.push(npc_data.character_id);
+				}
+
+				storage.set_cast_tab(tab_id, tab_data);
+
+				storage.set_current_cast_tab(tab_id);
+				$popup.dialog('close');
+				view_cast();
+			});
+		}
+
+		// Set the save new button to work
+		$popup.find('button[new_tab]').off('click').click(function()
+		{
+			var tab_name = $popup.find('input[new_tab]').val(), tab_id;
+			var npc_data, tab_data;
+
+			if (tab_name === '')
+			{
+				return;
+			}
+
+			tab_id = storage.create_cast_tab(tab_name);
+			tab_data = storage.get_cast_tab(tab_id);
+
+			for (i = mob.length - 1; i >= 0; i--)
+			{
+				npc_data = storage.set_character(mob[i]);
+				tab_data.characters.push(npc_data.character_id);
+			}
+
+			storage.set_cast_tab(tab_id, tab_data);
+			storage.set_current_cast_tab(tab_id);
+			$popup.dialog('close');
+			view_cast();
+		});
+
+		$popup.dialog({
+			autoOpen: false,
+			modal: true,
+			title: 'Add NPCs to specific tab',
+			width: 500,
+			buttons: [
+				{
+					text: "Cancel",
+					click: function() {
+						$(this).dialog( "close" );
+					}
+				}
+			]
+		});
+
+		$template.find('#mob_generator #add_dialog').button('enable').off('click').click(function()
+		{
+			$popup.dialog('open');
+			$popup.find('select').selectmenu();
+		});
 	});
 
 	$template.find('#mob_generator #discard_minion').button('disable').click(function ()
 	{
 		$template.find('#mob_generator #generated_results').empty();
-
 		$template.find('#mob_generator #discard_minion').button('disable');
-
 		$template.find('#mob_generator #add_to_cast').button('disable');
+		$template.find('#mob_generator #add_dialog').button('disable');
 	});
 
 	$template.find('#mob_generator #add_to_cast').button('disable');
+	$template.find('#mob_generator #add_dialog').button('disable');
 
 	// TODO add a reset button to the form to reset all the values to default. Could just call view_generator()
-
-	// TODO want a button that adds the generated mook to the cast as well as a specified tab
 
 	// Make things pretty!
 	$template.find('select').selectmenu();
@@ -771,6 +932,6 @@ function setup_controls()
 	view_intro();
 }
 
-var build_id = '0.10';
-var total_count = 78;
+var build_id = '0.11';
+var total_count = 80;
 var download_url = 'https://github.com/toktic/sr_gmt';

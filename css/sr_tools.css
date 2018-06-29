@@ -1,10 +1,27 @@
-body{
+body
+{
 	background-color: #383838;
 	font-family: "Trebuchet MS", sans-serif;
 	margin: 50px;
 }
 
+@font-face
+{
+	font-family: ShadowrunNormal;
+	src: url("fonts/shadowrun_regular.ttf");
+}
 
+@font-face
+{
+	font-family: ShadowrunItalics;
+	src: url("fonts/shadowrun_italic.ttf");
+}
+
+@font-face
+{
+	font-family: ShadowrunBold;
+	src: url("fonts/shadowrun_bold.ttf");
+}
 
 /*.demoHeaders {*/
 	/*margin-top: 2em;*/
@@ -105,6 +122,7 @@ body{
 	color: #fff;
 	margin-top: 24px;
 	margin-left: 24px;
+	font-family: "ShadowrunNormal", Arial, sans-serif;
 }
 
 
@@ -117,8 +135,8 @@ body{
 .top_bar .top_bar_roller
 {
 	position: absolute;
-	top: 0;
-	right: 0;
+	top: 5px;
+	right: 5px;
 }
 
 .top_bar .top_bar_roller > div
@@ -137,7 +155,7 @@ body{
 {
 	background-color: #383838;
 	color: #fff;
-	height: 84px;
+	height: 77px;
 	width: 450px;
 }
 
@@ -176,6 +194,7 @@ body{
 {
 	padding-right: 25%;
 	padding-bottom: 20px;
+	font-family: "ShadowrunNormal", Arial, sans-serif;
 }
 
 .main_content .intro_screen .legalese

@@ -300,7 +300,7 @@
 
 					<button id="add_to_cast">Add to Cast</button>
 
-					<span id="add_to_cast_tab"></span>
+					<button id="add_dialog">Add to Specific Tab</button>
 				</div>
 			</div>
 			<div id="mob_generator">
@@ -396,7 +396,7 @@
 
 					<button id="add_to_cast">Add all to Cast</button>
 
-					<span id="add_to_cast_tab"></span>
+					<button id="add_dialog">Add to Specific Tab</button>
 				</div>
 			</div>
 		</div>
@@ -857,6 +857,40 @@
 		<div class="tools">
 			<button class="delete_cast_member"><span title="Delete" class="ui-icon ui-icon-circle-close"></span></button>
 			<div class="dialog">Remove this character from this tab? This character can still be found in the full cast.</div>
+		</div>
+	</div>
+
+	<div template="add_dialog_single" class="add_dialog_single">
+		<div class="existing_tab_wrapper">
+			<div>Add this NPC to one of the existing tabs.</div>
+			<div><select name="existing"></select></div>
+			<div class="spacer_5"></div>
+			<button existing>Add</button>
+
+			<div class="spacer_20"></div>
+		</div>
+		<div class="new_tab_wrapper">
+			<div>Add this NPC to a new tab.</div>
+			<div><input new_tab/></div>
+			<div class="spacer_5"></div>
+			<button new_tab>Create &amp; Add</button>
+		</div>
+	</div>
+
+	<div template="add_dialog_mob" class="add_dialog_mob">
+		<div class="existing_tab_wrapper">
+			<div>Add these NPCs to one of the existing tabs.</div>
+			<div><select name="existing"></select></div>
+			<div class="spacer_5"></div>
+			<button existing>Add</button>
+
+			<div class="spacer_20"></div>
+		</div>
+		<div class="new_tab_wrapper">
+			<div>Add these NPCs to a new tab.</div>
+			<div><input new_tab/></div>
+			<div class="spacer_5"></div>
+			<button new_tab>Create &amp; Add</button>
 		</div>
 	</div>
 </div>
