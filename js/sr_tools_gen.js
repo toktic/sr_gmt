@@ -8,7 +8,7 @@ var gen = {
 
 	_merge_adjustments: function(base, adjust)
 	{
-		var i;
+		var i, attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma'];
 
 		if (!base.hasOwnProperty('professional_description') && adjust.hasOwnProperty('professional_description'))
 		{
@@ -17,25 +17,27 @@ var gen = {
 
 		if (adjust.hasOwnProperty('attributes'))
 		{
-			// Adjust all attributes
-			base.attributes.strength += (adjust.attributes.hasOwnProperty('strength')) ? adjust.attributes.strength : 0;
-			base.attributes.agility += (adjust.attributes.hasOwnProperty('agility')) ? adjust.attributes.agility : 0;
-			base.attributes.reaction += (adjust.attributes.hasOwnProperty('reaction')) ? adjust.attributes.reaction : 0;
-			base.attributes.body += (adjust.attributes.hasOwnProperty('body')) ? adjust.attributes.body : 0;
-			base.attributes.charisma += (adjust.attributes.hasOwnProperty('charisma')) ? adjust.attributes.charisma : 0;
-			base.attributes.logic += (adjust.attributes.hasOwnProperty('logic')) ? adjust.attributes.logic : 0;
-			base.attributes.intuition += (adjust.attributes.hasOwnProperty('intuition')) ? adjust.attributes.intuition : 0;
-			base.attributes.will += (adjust.attributes.hasOwnProperty('will')) ? adjust.attributes.will : 0;
+			var racial = false;
 
-			// Make sure all attributes are at least 1, we don't care about actual upper caps for now.
-			base.attributes.strength = (base.attributes.strength < 1) ? 1 : base.attributes.strength;
-			base.attributes.agility = (base.attributes.agility < 1) ? 1 : base.attributes.agility;
-			base.attributes.reaction = (base.attributes.reaction < 1) ? 1 : base.attributes.reaction;
-			base.attributes.body = (base.attributes.body < 1) ? 1 : base.attributes.body;
-			base.attributes.charisma = (base.attributes.charisma < 1) ? 1 : base.attributes.charisma;
-			base.attributes.logic = (base.attributes.logic < 1) ? 1 : base.attributes.logic;
-			base.attributes.intuition = (base.attributes.intuition < 1) ? 1 : base.attributes.intuition;
-			base.attributes.will = (base.attributes.will < 1) ? 1 : base.attributes.will;
+			if (base.hasOwnProperty('race'))
+				racial = db.get_metatype_adjustment(base.race);
+
+			attributes.forEach(function(att)
+			{
+				if (adjust.attributes.hasOwnProperty(att))
+				{
+					base.attributes[att] += adjust.attributes[att];
+
+					if (racial)
+					{
+						// Racial Minimum
+						base.attributes[att] = Math.max(racial.min_attributes[att], base.attributes[att]);
+
+						// Racial Maximum
+						base.attributes[att] = Math.min(racial.max_attributes[att], base.attributes[att]);
+					}
+				}
+			});
 		}
 
 		if (adjust.hasOwnProperty('skills'))
@@ -230,6 +232,11 @@ var gen = {
 			is_adept: false,
 			is_mage: false,
 			is_decker: false,
+			is_johnson: false,
+			is_gunbunny: false,
+			is_samurai: false,
+			is_tank: false,
+			is_shaman: false,
 			is_contact: false,
 			contact: false, // {connection rating, loyalty rating, type} || false
 			notes: null
@@ -380,32 +387,308 @@ var gen = {
 
 		if (options.is_lt)
 		{
-			adjustments = db.get_special_adjustments('LT', options.professional_type, options.professional_rating);
+			adjustments = db.get_special_adjustments('LT', options);
 			this._merge_adjustments(mook, adjustments);
 			mook.special.is_lt = true;
 		}
 
 		if (options.is_decker)
 		{
-			adjustments = db.get_special_adjustments('Decker', options.professional_type, options.professional_rating);
+			adjustments = db.get_special_adjustments('Decker', options);
 			this._merge_adjustments(mook, adjustments);
 			mook.special.is_decker = true;
 		}
 
 		if (options.is_adept)
 		{
-			adjustments = db.get_special_adjustments('Adept', options.professional_type, options.professional_rating);
+			adjustments = db.get_special_adjustments('Adept', options);
 			this._merge_adjustments(mook, adjustments);
 			mook.special.is_adept = true;
 		}
 
 		if (options.is_mage)
 		{
-			adjustments = db.get_special_adjustments('Mage', options.professional_type, options.professional_rating);
+			adjustments = db.get_special_adjustments('Mage', options);
 			this._merge_adjustments(mook, adjustments);
 			mook.special.is_mage = true;
 		}
 
+		if (options.is_shaman)
+		{
+			adjustments = db.get_special_adjustments('Shaman', options);
+			this._merge_adjustments(mook, adjustments);
+			mook.special.is_tank = true;
+		}
+
+		if (options.is_tank)
+		{
+			adjustments = db.get_special_adjustments('Tank', options);
+			this._merge_adjustments(mook, adjustments);
+			mook.special.is_tank = true;
+		}
+
+		if (options.is_samurai)
+		{
+			adjustments = db.get_special_adjustments('Samurai', options);
+			this._merge_adjustments(mook, adjustments);
+			mook.special.is_tank = true;
+		}
+
+		if (options.is_gunbunny)
+		{
+			adjustments = db.get_special_adjustments('Gunbunny', options);
+			this._merge_adjustments(mook, adjustments);
+			mook.special.is_tank = true;
+		}
+
+		if (options.is_johnson)
+		{
+			adjustments = db.get_special_adjustments('Johnson', options);
+			this._merge_adjustments(mook, adjustments);
+			mook.special.is_tank = true;
+		}
+
+		// If this is a Troll who has certain augmentations, they need to lose the Troll Dermal Deposits
+		if (mook.race === 'Troll')
+		{
+			var skin_augments = ['Dermal Plating', 'Orthoskin'];
+
+			var augment = mook.augmentations.filter(function (aug)
+			{
+				return skin_augments.includes(aug.name);
+			});
+
+			if (augment.length > 0)
+			{
+				augment = mook.augmentations.filter(function (aug)
+				{
+					return aug.name !== 'Troll Dermal Deposits';
+				});
+				mook.augmentations = augment;
+			}
+		}
+
 		return mook;
+	},
+
+	matrix_host: function(options)
+	{
+		if (options === undefined)
+		{
+			options = {};
+		}
+
+		options = $.extend({}, {
+			// matrix_host: false, // False, or a host rating
+			// matrix_host_mode: 'Secure', // Ratings order; Secure: FADS, Data: DFAS, Hidden: SFAD
+			notes: null
+		}, options);
+
+		// TODO make the rest of this useful later
+	},
+
+	_corp_name_combine_word: [
+		'aim',
+		'arm',
+		'ash',
+		'auto',
+		'block',
+		'bright',
+		'caption',
+		'com',
+		'down',
+		'dream',
+		'fund',
+		'gate',
+		'green',
+		'hydro',
+		'lion',
+		'mark',
+		'max',
+		'motor',
+		'plastic',
+		'point',
+		'scope',
+		'strong',
+		'sun',
+		'thermo',
+		'wood',
+		'works'
+	],
+
+	_corp_name_modifier_word: [
+		'Ace',
+		'Action',
+		'Advanced',
+		'Anchor',
+		'Apparel',
+		'Aquatic',
+		'Atlas',
+		'Boulder',
+		'Broadcasting',
+		'Collective',
+		'Construction',
+		'Eagle',
+		'Electric',
+		'Entertainment',
+		'Financial',
+		'Financial',
+		'Global',
+		'Gold',
+		'Golden',
+		'Green',
+		'International',
+		'Investigative',
+		'Lender',
+		'Machine',
+		'Master',
+		'Media',
+		'Network',
+		'New World',
+		'Old World',
+		'Research',
+		'Robotic',
+		'Stone',
+		'Visual',
+		'Wireless'
+	],
+
+	_corp_name_final_word: [
+		'Agriculture',
+		'Analysis',
+		'Analytics',
+		'Collective',
+		'Construction',
+		'Consumables',
+		'Corporation',
+		'Entertainment',
+		'Financial',
+		'Global',
+		'Group',
+		'Holdings',
+		'Incorporated',
+		'Industries',
+		'International',
+		'Investigations',
+		'Network',
+		'Press',
+		'Processing',
+		'Productions',
+		'Reporting',
+		'Research',
+		'Robotics',
+		'Security',
+		'Systems',
+		'Technologies',
+		'Works'
+	],
+
+	initials: function(count)
+	{
+		if (count === undefined)
+		{
+			count = roll.dval(3);
+		}
+
+		var l = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		var a = '.-/+';
+		var ret = [];
+
+		for (var i = 1; i <= count; i++)
+		{
+			ret.push(l[roll.dval(l.length) - 1])
+		}
+
+		if (roll.dval(5) === 5)
+		{
+			i = a[roll.dval(a.length) - 1];
+			return ret.join(i);
+		}
+		else
+		{
+			return ret.join('');
+		}
+	},
+
+	combine_words: function()
+	{
+		var i, j, k;
+
+		do {
+			i = roll.dval(this._corp_name_combine_word.length);
+			j = roll.dval(this._corp_name_combine_word.length);
+		} while (i === j);
+
+		k = this._corp_name_combine_word[i - 1] + this._corp_name_combine_word[j - 1];
+		return k[0].toUpperCase() + k.slice(1);
+	},
+
+	corp_name: function(options)
+	{
+		if (options === undefined)
+		{
+			options = {};
+		}
+
+		options = $.extend({}, {
+			format: null,
+			notes: null,
+			subsidiary: null // Subsidiary of '___'
+		}, options);
+
+		var corp = {name: ''}, name_parts = [];
+		var formats = ['double', 'initials', 'triple', 'initials double'];
+
+		if (options.format === null)
+		{
+			options.format = formats[roll.dval(formats.length) - 1];
+		}
+
+		switch(options.format)
+		{
+			case 'double':
+				if (roll.dval(2) === 2)
+				{
+					name_parts.push(this._corp_name_modifier_word[roll.dval(this._corp_name_modifier_word.length) - 1]);
+				}
+				else
+				{
+					name_parts.push(this.combine_words());
+				}
+				break;
+
+			case 'initials':
+				name_parts.push(this.initials());
+				break;
+
+			case 'triple':
+				if (roll.dval(2) === 2)
+				{
+					name_parts.push(this.combine_words());
+					name_parts.push(this._corp_name_modifier_word[roll.dval(this._corp_name_modifier_word.length) - 1]);
+				}
+				else
+				{
+					name_parts.push(this._corp_name_modifier_word[roll.dval(this._corp_name_modifier_word.length) - 1]);
+					name_parts.push(this.combine_words());
+				}
+				break;
+
+			case 'initials double':
+				name_parts.push(this.initials());
+				name_parts.push(this._corp_name_modifier_word[roll.dval(this._corp_name_modifier_word.length) - 1]);
+				break;
+
+			default:
+				console.log('ERROR: corp_name() with unknown format', options.format);
+				return;
+		}
+
+		// Generate the final word
+		name_parts.push(this._corp_name_final_word[roll.dval(this._corp_name_final_word.length) - 1]);
+
+		corp.name = name_parts.join(' ');
+
+		return corp;
 	}
 };

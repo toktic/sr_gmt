@@ -147,9 +147,12 @@ function view_cast(show_intro)
 				$deletion_dialog.dialog('open');
 			});
 
-			// TODO add a line saying when the character was created
+			$char_template.find('.created_date').html('Created: ' + render.format_string_date(cast.created));
 
-			// TODO add a line saying when the character was last edited (might not store that yet)
+			if (cast.edited)
+				$char_template.find('.edited_date').html('Last Edited: ' + render.format_string_date(cast.edited));
+			else
+				$char_template.find('.edited_date').hide();
 
 			// Add the npc to a given tab it isn't already in
 			var tabs = storage.get_cast_tabs();
@@ -729,6 +732,15 @@ function view_run()
 	$container.html('view the run generator');
 }
 
+function view_faq()
+{
+	var $container = $('.main_content').empty();
+
+	var $template = render.get_template('faq');
+
+	$container.append($template);
+}
+
 function view_settings()
 {
 	var $container = $('.main_content').empty();
@@ -900,7 +912,7 @@ function setup_controls()
 	{
 		var $results = $('.top_bar_roller #roll_results');
 		var results_text = $results.val() + "\n" + text;
-		
+
 		$results.val(results_text);
 
 		if ($results.val().length)
@@ -922,6 +934,8 @@ function setup_controls()
 
 	$('.menu .run').on('click', view_run).hide(); // TODO Hidden until I have it working
 
+	$('.menu .faq').on('click', view_faq);
+
 	$('.menu .settings').on('click', view_settings);
 
 	$('.top_bar .title').on('click', view_intro);
@@ -931,6 +945,6 @@ function setup_controls()
 	view_intro();
 }
 
-var build_id = '0.11';
-var total_count = 80;
+var build_id = '0.12';
+var total_count = 98;
 var download_url = 'https://github.com/toktic/sr_gmt';

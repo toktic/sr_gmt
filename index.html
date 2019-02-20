@@ -13,6 +13,7 @@
 	<script src="js/sr_tools_gen.js"></script>
 	<script src="js/sr_tools_render.js"></script>
 	<script src="js/sr_tools_roll.js"></script>
+	<script src="js/sr_tools_run.js"></script>
 	<script src="js/sr_tools_storage.js"></script>
 	<script>
 		$(function()
@@ -95,6 +96,7 @@
 	<button class="minion">NPC Generator</button>
 	<button class="contact">Contact Generator</button>
 	<button class="run">Run Generator</button>
+	<button class="faq">FAQ</button>
 	<button class="settings">Settings</button>
 </div>
 
@@ -169,6 +171,22 @@
 		<button class="tab_up smaller_button"><span class="ui-icon ui-icon-arrowthick-1-n"></span></button>
 		<button class="tab_down smaller_button"><span class="ui-icon ui-icon-arrowthick-1-s"></span></button>
 		<button class="delete_tab smaller_button"><span class="ui-icon ui-icon-trash"></span></button>
+	</div>
+
+	<div template="faq">
+		<h2>FAQ</h2>
+
+		<h3>Frequently Asked Questions &amp; Functionally Annoying Quirks</h3>
+
+		<div>
+			This is a listing of questions that have been asked or other points of knowledge that are likely relevant to new users.
+			This is also a collection of quirks and annoyances that have cropped up as part of turning a rulebook into an application.
+		</div>
+
+		<ul>
+			<li>NPC stats: The attributes for all NPCs follow a curve the higher up the professional rating goes.</li>
+			<li>Cyberlimbs: All cyberlimbs (arms &amp; legs) are assumed to have the same Strength and Agility scores as the NPC. So there is no additional averaging of attributes or other nonsense.</li>
+		</ul>
 	</div>
 
 	<div template="settings">
@@ -409,6 +427,7 @@
 		</div>
 		<div class="npc_name"></div>
 		<div class="npc_description"></div>
+		<div class="npc_notes"></div>
 		<div class="attribute_names">
 			<div class="attribute_name">BOD</div>
 			<div class="attribute_name">AGI</div>
@@ -520,6 +539,7 @@
 		</div>
 		<div class="npc_name"></div>
 		<div class="npc_description"></div>
+		<div class="npc_notes"></div>
 		<div class="attribute_names">
 			<div class="attribute_name">BOD</div>
 			<div class="attribute_name">AGI</div>
@@ -680,6 +700,10 @@
 			<div class="attribute_name magic">MAG</div>
 			<div class="attribute_name initiate">INIT</div>
 		</div>
+		<div class="npc_notes">
+			<label>Notes</label>
+			<textarea id="npc_notes"></textarea>
+		</div>
 		<div class="attribute_values">
 			<div class="attribute_value body"></div>
 			<div class="attribute_value agility"></div>
@@ -833,7 +857,8 @@
 		<div class="entry"></div>
 		<div class="tools">
 			<button class="delete_cast_member"><span title="Delete" class="ui-icon ui-icon-circle-close"></span></button>
-
+			<div class="created_date"></div>
+			<div class="edited_date"></div>
 			<div class="add_to_tab">
 				<div>
 					<span>Add NPC to tab:</span>

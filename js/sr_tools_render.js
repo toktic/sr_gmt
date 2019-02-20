@@ -79,6 +79,13 @@ var render = {
 				changes_made = true;
 			}
 
+			// Notes
+			if (data.notes !== $mook.find('#npc_notes').val().trim())
+			{
+				data.notes = $mook.find('#npc_notes').val().trim();
+				changes_made = true;
+			}
+
 			// Gender
 			if (data.gender !== $mook.find('select[name="gender"]').val().trim())
 			{
@@ -146,6 +153,10 @@ var render = {
 
 			// Commlink
 			data.commlink = parseInt($mook.find('.other_information .commlink .value select').val());
+
+			// Last edited
+			if (changes_made)
+				data.edited = new Date().toJSON();
 
 			if (data.hasOwnProperty('character_id') && changes_made)
 			{
@@ -268,7 +279,8 @@ var render = {
 
 				// Need to skip some special qualities: 'Adept' and 'Magician (Hermetic)'
 				// If either one is present, they can't be edited or deleted
-				if (quality === 'Adept' || quality === 'Magician (Hermetic)')
+				var skip_qualities = ['Adept', 'Magician (Hermetic)', 'Magician (Shaman)'];
+				if (skip_qualities.includes(quality))
 					$quality.find('button').detach();
 			});
 
@@ -404,7 +416,7 @@ var render = {
 
 		var redraw_augmentations = function()
 		{
-			var $augmentation_div = $mook.find('.other_information .augments > div.value'), current_augments = [];
+			var $augmentation_div = $mook.find('.other_information .augments > div.value'), current_augments = [], stock_augment;
 
 			$augmentation_div.empty();
 
@@ -423,14 +435,8 @@ var render = {
 					if (augmentation.hasOwnProperty('rating'))
 					{
 						rating = augmentation.rating;
-
-						all_augments.forEach(function(all)
-						{
-							if (all.name === name)
-							{
-								max_rating = all.max_rating;
-							}
-						});
+						stock_augment = db.get_augmentation(name);
+						max_rating = stock_augment.max_rating;
 					}
 				}
 
@@ -476,27 +482,14 @@ var render = {
 		{
 			if ($(this).val().length !== 0)
 			{
-				var augment_name = $(this).val();
+				var augment_name = $(this).val(), stock_augment = db.get_augmentation(augment_name);
 
-				all_augments.forEach(function(aug)
+				if (stock_augment.hasOwnProperty('max_rating'))
 				{
-					if (aug.name === augment_name)
-					{
-						if (aug.hasOwnProperty('max_rating'))
-						{
-							data.augmentations.push({
-								name: augment_name,
-								rating: 1
-							});
-						}
-						else
-						{
-							data.augmentations.push({
-								name: augment_name
-							});
-						}
-					}
-				});
+					stock_augment.rating = 1;
+				}
+
+				data.augmentations.push(stock_augment);
 			}
 
 			redraw_augmentations();
@@ -565,6 +558,11 @@ var render = {
 					$weapon.find('.weapon').html(weapon);
 					$weapon.find('button').prop('weapon_name', weapon);
 				}
+				else if (weapon.weapon_focus === true)
+				{
+					$weapon.find('.weapon').html(weapon.name + ' (Weapon Focus)');
+					$weapon.find('button').prop('weapon_name', weapon.name);
+				}
 				else if (weapon.magic_focus === true)
 				{
 					$weapon.find('.weapon').html(weapon.base_name + ' ' + weapon.name);
@@ -591,7 +589,7 @@ var render = {
 		{
 			if ($(this).val().length !== 0)
 			{
-				var weapon = db.get_weapon_attributes({name: $(this).val()});
+				var weapon = db.get_weapon($(this).val());
 
 				if (weapon.name)
 					data.weapons.push(weapon.name);
@@ -741,6 +739,8 @@ var render = {
 	{
 		var i, $mook = render.get_template('render__action_npc'), wp = {penalty: 0};
 
+		options = $.extend({}, options);
+
 		$target.empty().append($mook);
 
 		// Add buttons to enter other modes
@@ -757,22 +757,40 @@ var render = {
 			render.mook_for_edit($target, data, options);
 		});
 
-		// Fill in the name
-		$mook.find('.npc_name').html(data.name);
+		// Fill in the name and description
+		if (data.edited)
+		{
+			$mook.find('.npc_name').html(data.name + ' -- ' + data.gender + ' ' + data.race);
 
-		// Fill in the description
-		var description = data.gender + ' ' + data.race + ', Rating ' + data.professional_rating + ' ' + data.professional_description;
+			$mook.find('.npc_description').hide();
+		}
+		else
+		{
+			$mook.find('.npc_name').html(data.name);
 
-		if (data.special.is_lt)
-			description += ' Lieutenant';
-		if (data.special.is_decker)
-			description += ' Decker';
-		if (data.special.is_adept)
-			description += ' Physical Adept';
-		if (data.special.is_mage)
-			description += ' Magician';
+			var description = data.gender + ' ' + data.race + ', Rating ' + data.professional_rating + ' ' + data.professional_description;
 
-		$mook.find('.npc_description').html(description);
+			if (data.special.is_lt)
+				description += ' Lieutenant';
+			if (data.special.is_decker)
+				description += ' Decker';
+			if (data.special.is_adept)
+				description += ' Physical Adept';
+			if (data.special.is_mage)
+				description += ' Magician';
+
+			$mook.find('.npc_description').html(description);
+		}
+
+		// Fill in notes if there are any
+		if (data.notes)
+		{
+			$mook.find('.npc_notes').html(data.notes);
+		}
+		else
+		{
+			$mook.find('.npc_notes').hide();
+		}
 
 		// Base Attributes
 		var augmented_attributes = this.calc_augmented_attributes(data);
@@ -1060,7 +1078,16 @@ var render = {
 
 				augment = aug.name;
 
-				if (aug.hasOwnProperty('rating'))
+				if (aug.name === 'Bone Lacing')
+				{
+					if (aug.rating === 1)
+						augment += ' (Plastic)';
+					else if (aug.rating === 2)
+						augment += ' (Aluminum)';
+					else if (aug.rating === 3)
+						augment += ' (Titanium)';
+				}
+				else if (aug.hasOwnProperty('rating'))
 				{
 					augment += ' ' + aug.rating;
 				}
@@ -1090,6 +1117,18 @@ var render = {
 		{
 			if (aug.name === 'Troll Dermal Deposits')
 				soak++;
+
+			if (aug.type === 'full cyberlimb')
+			{
+				if (aug.bonus_armor > 0)
+					soak += aug.bonus_armor;
+			}
+
+			if (aug.name === 'Bone Lacing')
+				soak += (aug.rating * 2);
+
+			if (aug.name === 'Orthoskin' || aug.name === 'Dermal Plating' || aug.name === 'Bone Density Augmentation')
+				soak += aug.rating;
 		});
 
 		if (data.armor.length !== 0)
@@ -1136,25 +1175,17 @@ var render = {
 		for (i in data.weapons)
 		{
 			// clone object
-			var weapon, weapon_stats;
+			var weapon;
 
 			if (typeof data.weapons[i] === 'string')
-			{
-				weapon = {
-					name: data.weapons[i]
-				}
-			}
+				weapon = db.get_weapon(data.weapons[i]);
 			else
-			{
-				weapon = $.extend({}, data.weapons[i]);
-			}
+				weapon = $.extend(db.get_weapon(data.weapons[i].name), data.weapons[i]);
 
-			weapon_stats = db.get_weapon_attributes(weapon);
-
-			if (weapon_stats.type === 'Melee')
-				melee.push(weapon_stats);
+			if (weapon.type === 'Melee')
+				melee.push(weapon);
 			else
-				ranged.push(weapon_stats);
+				ranged.push(weapon);
 		}
 
 		for (i in melee)
@@ -1162,6 +1193,9 @@ var render = {
 			entry = melee[i];
 
 			entry_text = [entry.ability];
+
+			if (entry.weapon_focus)
+				entry_text.push('Weapon Focus');
 
 			if (entry.hasOwnProperty('force'))
 				entry_text.push('Force ' + entry.force);
@@ -1243,12 +1277,9 @@ var render = {
 
 		if (has_spur)
 		{
-			entry = db.get_weapon_attributes({name: 'Cyber Spur'});
+			entry = db.get_weapon('Cyber Spur');
 
 			entry_text = [entry.ability];
-
-			if (entry.hasOwnProperty('force'))
-				entry_text.push('Force ' + entry.force);
 
 			if (limits.physical === limits.physical_aug)
 				entry_text.push('Acc ' + limits.physical);
@@ -1559,24 +1590,44 @@ var render = {
 		// will need to calculate augmented attributes, limits, and damage resistance pool
 		var i, $mook = render.get_template('render__display_npc');
 
+		options = $.extend({}, options);
+
 		$target.empty().append($mook);
 
-		// Fill in the name
-		$mook.find('.npc_name').html(data.name);
+		// Fill in the name and description
+		if (data.edited)
+		{
+			$mook.find('.npc_name').html(data.name + ' -- ' + data.gender + ' ' + data.race);
 
-		// Fill in the description
-		var description = data.gender + ' ' + data.race + ', Rating ' + data.professional_rating + ' ' + data.professional_description;
+			$mook.find('.npc_description').hide();
+		}
+		else
+		{
+			$mook.find('.npc_name').html(data.name);
 
-		if (data.special.is_lt)
-			description += ' Lieutenant';
-		if (data.special.is_decker)
-			description += ' Decker';
-		if (data.special.is_adept)
-			description += ' Physical Adept';
-		if (data.special.is_mage)
-			description += ' Magician';
+			var description = data.gender + ' ' + data.race + ', Rating ' + data.professional_rating + ' ' + data.professional_description;
 
-		$mook.find('.npc_description').html(description);
+			if (data.special.is_lt)
+				description += ' Lieutenant';
+			if (data.special.is_decker)
+				description += ' Decker';
+			if (data.special.is_adept)
+				description += ' Physical Adept';
+			if (data.special.is_mage)
+				description += ' Magician';
+
+			$mook.find('.npc_description').html(description);
+		}
+
+		// Fill in notes if there are any
+		if (data.notes)
+		{
+			$mook.find('.npc_notes').html(data.notes);
+		}
+		else
+		{
+			$mook.find('.npc_notes').hide();
+		}
 
 		// Base Attributes
 		var augmented_attributes = this.calc_augmented_attributes(data);
@@ -1658,8 +1709,16 @@ var render = {
 
 		// Condition Monitor
 		var cm = data.attributes.body > data.attributes.will ? data.attributes.body : data.attributes.will;
+		cm = 8 + roll.half(cm);
 
-		$mook.find('.information .condition_monitor .value').html(8 + roll.half(cm));
+		// Add in the bonus for having cyberlimbs
+		var cyberlimbs = data.augmentations.filter(function (aug)
+		{
+			return aug.hasOwnProperty('type') && aug.type === 'full cyberlimb';
+		});
+		cm += cyberlimbs.length;
+
+		$mook.find('.information .condition_monitor .value').html(cm);
 
 		// Limits
 		var limits = this.calc_limits(data.attributes, augmented_attributes);
@@ -1752,7 +1811,16 @@ var render = {
 
 				augment = aug.name;
 
-				if (aug.hasOwnProperty('rating'))
+				if (aug.name === 'Bone Lacing')
+				{
+					if (aug.rating === 1)
+						augment += ' (Plastic)';
+					else if (aug.rating === 2)
+						augment += ' (Aluminum)';
+					else if (aug.rating === 3)
+						augment += ' (Titanium)';
+				}
+				else if (aug.hasOwnProperty('rating'))
 				{
 					augment += ' ' + aug.rating;
 				}
@@ -1782,6 +1850,18 @@ var render = {
 		{
 			if (aug.name === 'Troll Dermal Deposits')
 				soak++;
+
+			if (aug.type === 'full cyberlimb')
+			{
+				if (aug.bonus_armor > 0)
+					soak += aug.bonus_armor;
+			}
+
+			if (aug.name === 'Bone Lacing')
+				soak += (aug.rating * 2);
+
+			if (aug.name === 'Orthoskin' || aug.name === 'Dermal Plating' || aug.name === 'Bone Density Augmentation')
+				soak += aug.rating;
 		});
 
 		if (data.armor.length !== 0)
@@ -1808,25 +1888,17 @@ var render = {
 		for (i in data.weapons)
 		{
 			// clone object
-			var weapon, weapon_stats;
+			var weapon;
 
 			if (typeof data.weapons[i] === 'string')
-			{
-				weapon = {
-					name: data.weapons[i]
-				}
-			}
+				weapon = db.get_weapon(data.weapons[i]);
 			else
-			{
-				weapon = $.extend({}, data.weapons[i]);
-			}
+				weapon = $.extend(db.get_weapon(data.weapons[i].name), data.weapons[i]);
 
-			weapon_stats = db.get_weapon_attributes(weapon);
-
-			if (weapon_stats.type === 'Melee')
-				melee.push(weapon_stats);
+			if (weapon.type === 'Melee')
+				melee.push(weapon);
 			else
-				ranged.push(weapon_stats);
+				ranged.push(weapon);
 		}
 
 		for (i in melee)
@@ -1834,6 +1906,9 @@ var render = {
 			entry = melee[i];
 
 			entry_text = [entry.ability];
+
+			if (entry.weapon_focus)
+				entry_text.push('Weapon Focus');
 
 			if (entry.hasOwnProperty('force'))
 				entry_text.push('Force ' + entry.force);
@@ -1865,12 +1940,9 @@ var render = {
 		});
 		if (data.augmentations.includes('Cyber Spur') || has_spur)
 		{
-			entry = db.get_weapon_attributes({name: 'Cyber Spur'});
+			entry = db.get_weapon('Cyber Spur');
 
 			entry_text = [entry.ability];
-
-			if (entry.hasOwnProperty('force'))
-				entry_text.push('Force ' + entry.force);
 
 			if (limits.physical === limits.physical_aug)
 				entry_text.push('Acc ' + limits.physical);
@@ -2102,30 +2174,10 @@ var render = {
 			if (aug.hasOwnProperty('name'))
 				name = aug.name;
 
+			// Handle essence loss
 			switch (name)
 			{
-				case 'Muscle Augmentation':
-					attr.strength += aug.rating;
-					attr.essence -= aug.rating * 0.2;
-					break;
-
-				case 'Muscle Toner':
-					attr.agility += aug.rating;
-					attr.essence -= aug.rating * 0.2;
-					break;
-
-				case 'Cerebellum Booster':
-					attr.intuition += aug.rating;
-					attr.essence -= aug.rating * 0.2;
-					break;
-
-				case 'Cerebral Booster':
-					attr.logic += aug.rating;
-					attr.essence -= aug.rating * 0.2;
-					break;
-
 				case 'Wired Reflexes':
-					attr.reaction += aug.rating;
 					if (aug.rating === 1)
 						attr.essence -= 2;
 					else if (aug.rating === 2)
@@ -2134,13 +2186,78 @@ var render = {
 						attr.essence -= 5;
 					break;
 
-				case 'Synaptic Booster':
-					attr.reaction += aug.rating;
-					attr.essence -= aug.rating * 0.5;
+				case 'Cybereyes':
+					attr.essence -= (0.1 + aug.essence * aug.rating);
 					break;
 
-				case 'Cyber Spur':
-					attr.essence -= 0.3;
+				default:
+					if (aug.hasOwnProperty('rating') && aug.hasOwnProperty('essence'))
+					{
+						attr.essence -= aug.rating * aug.essence;
+					}
+					else if (aug.hasOwnProperty('essence'))
+					{
+						attr.essence -= aug.essence;
+					}
+					break;
+			}
+
+			// Handle attribute changes
+			switch (name)
+			{
+				case 'Muscle Augmentation':
+					attr.strength += aug.rating;
+					break;
+
+				case 'Muscle Toner':
+					attr.agility += aug.rating;
+					break;
+
+				case 'Cerebellum Booster':
+					attr.intuition += aug.rating;
+					break;
+
+				case 'Cerebral Booster':
+					attr.logic += aug.rating;
+					break;
+
+				case 'Wired Reflexes':
+					attr.reaction += aug.rating;
+					break;
+
+				case 'Synaptic Booster':
+					attr.reaction += aug.rating;
+					break;
+
+				case 'Jazz (Active)':
+					attr.reaction++;
+					break;
+
+				case 'Kamikaze (Active)':
+					attr.body++;
+					attr.agility++;
+					attr.strength += 2;
+					attr.will++;
+					break;
+
+				case 'Kamikaze (Crash)':
+					attr.reaction--;
+					attr.will--;
+					break;
+
+				case 'Novacoke (Active)':
+					attr.charisma++;
+					attr.reaction++;
+					break;
+
+				case 'Novacoke (Crash)':
+					attr.reaction -= 20;
+					attr.charisma -= 20;
+					break;
+
+				case 'Psyche (Active)':
+					attr.intuition++;
+					attr.logic++;
 					break;
 			}
 		});
@@ -2293,6 +2410,13 @@ var render = {
 		var box_count = 8 + roll.half(data.attributes.body > data.attributes.will ? data.attributes.body : data.attributes.will);
 		var frequency = data.wound_penalty, total_penalty = 0, guid = this.guid();
 
+		// Add in the bonus for having cyberlimbs
+		var cyberlimbs = data.augmentations.filter(function (aug)
+		{
+			return aug.hasOwnProperty('type') && aug.type === 'full cyberlimb';
+		});
+		box_count += cyberlimbs.length;
+
 		$cm.prop('guid', guid);
 
 		for (i = 0; i <= box_count; i++)
@@ -2358,6 +2482,14 @@ var render = {
 		}
 
 		box_count = 8 + roll.half(data.attributes.body);
+
+		// Add in the bonus for having cyberlimbs
+		var cyberlimbs = data.augmentations.filter(function (aug)
+		{
+			return aug.hasOwnProperty('type') && aug.type === 'full cyberlimb';
+		});
+		box_count += cyberlimbs.length;
+
 		for (i = 0; i <= box_count; i++)
 		{
 			$box = $('<div/>').appendTo($cm.find('.physical.boxes'));
@@ -2459,6 +2591,20 @@ var render = {
 		{
 			widest = $(this).width() > widest ? ($(this).width() + 30) : widest;
 		}).width(widest);
+	},
+
+	format_string_date: function(date_string, format)
+	{
+		var ret, date_obj = new Date(date_string);
+
+		switch(format)
+		{
+			default:
+				ret = date_obj.toLocaleString();
+				break;
+		}
+
+		return ret;
 	},
 
 	guid: function()

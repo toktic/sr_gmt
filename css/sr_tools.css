@@ -23,47 +23,6 @@ body
 	src: url("fonts/shadowrun_bold.ttf");
 }
 
-/*.demoHeaders {*/
-	/*margin-top: 2em;*/
-/*}*/
-/*#dialog-link {*/
-	/*padding: .4em 1em .4em 20px;*/
-	/*text-decoration: none;*/
-	/*position: relative;*/
-/*}*/
-/*#dialog-link span.ui-icon {*/
-	/*margin: 0 5px 0 0;*/
-	/*position: absolute;*/
-	/*left: .2em;*/
-	/*top: 50%;*/
-	/*margin-top: -8px;*/
-/*}*/
-/*#icons {*/
-	/*margin: 0;*/
-	/*padding: 0;*/
-/*}*/
-/*#icons li {*/
-	/*margin: 2px;*/
-	/*position: relative;*/
-	/*padding: 4px 0;*/
-	/*cursor: pointer;*/
-	/*float: left;*/
-	/*list-style: none;*/
-/*}*/
-/*#icons span.ui-icon {*/
-	/*float: left;*/
-	/*margin: 0 4px;*/
-/*}*/
-/*.fakewindowcontain .ui-widget-overlay {*/
-	/*position: absolute;*/
-/*}*/
-/*select {*/
-	/*width: 200px;*/
-/*}*/
-
-
-
-
 
 
 .big_button
@@ -99,11 +58,6 @@ body
 	font-weight: normal;
 }
 
-
-
-
-
-
 .top_bar
 {
 	position: absolute;
@@ -124,7 +78,6 @@ body
 	margin-left: 24px;
 	font-family: "ShadowrunNormal", Arial, sans-serif;
 }
-
 
 .top_bar .version
 {
@@ -176,9 +129,6 @@ body
 	margin-top: 10px;
 }
 
-
-
-
 .main_content
 {
 	position: absolute;
@@ -209,8 +159,6 @@ div[template_holder]
 	display: none;
 }
 
-
-
 .entry_form
 {
 
@@ -229,9 +177,6 @@ div[template_holder]
 {
 	width: 200px;
 }
-
-
-
 
 .spacer_5
 {
@@ -355,7 +300,8 @@ div[template_holder]
 }
 
 .display_npc_wrapper .npc_name,
-.display_npc_wrapper .npc_description
+.display_npc_wrapper .npc_description,
+.display_npc_wrapper .npc_notes
 {
 	border-bottom: 1px solid #ccee00;
 	padding: 2px 2px 2px 4px;
@@ -490,7 +436,6 @@ div[template_holder]
 	flex: 0 0 40px;
 }
 
-
 .action_npc_wrapper .information .condition_monitor_combined,
 .action_npc_wrapper .information .condition_monitor_separate
 {
@@ -542,11 +487,13 @@ div[template_holder]
 	padding-right: 4px;
 }
 
-.edit_npc_wrapper .other_information
+.edit_npc_wrapper .npc_notes textarea
 {
-
+	margin: 2px 2px 2px 4px;
+	width: calc(100% - 16px);
 }
 
+.edit_npc_wrapper .npc_notes label,
 .edit_npc_wrapper .other_information > div > label
 {
 	display: block;
