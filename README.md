@@ -1,37 +1,19 @@
-## Welcome to GitHub Pages
+# Welcome to my Shadowrun GM Mob Master!
 
-You can use the [editor on GitHub](https://github.com/toktic/sr_gmt/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+The GM Mob Master was created as a set of tools for Shadowrun game masters. It started as a way of generating extra NPCs for combat-heavy runs, and as a thought exercise in how to expand the list of grunts in the Core Rulebook to more situations. The intent was to include generators and lists that would make it easier for game masters to get mechanics out of the way and spend more time telling stories. My hope was that this will eventually make it easy for game masters to generate an entire session of entertainment with the click of a few buttons.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+It is divided into several sections, all of which can be accessed by the buttons on the left. There is also a dice-simulator at the top to let you quickly simulate a fist-full of dice. Remember, as a GM you don't have to be honest with how many successes or failures you "rolled"...
 
-### Markdown
+- The first section is **Cast of Shadows**. This holds the full assortment of npcs that you create and save for use later. The "Full Cast" lists all saved cast members. You can create plenty of custom tabs and list only the cast members you need for a scene on that tab.
+- Next up is the **NPC Generator**. You can use the tabs within to create a single NPC or a horde of them. Just be aware that if you create one and don't save them to the **Cast of Shadows**, they will disappear and be lost.
+- **Settings** has a selection of, you guessed it, Settings that you can change. This also has a Nuke button if you want to delete all of your saved information and start over from scratch.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+This has also served as a creative outlet for programming for my own enjoyment. I have spent quite a few hours on this utility in the name of fun. There was never any intention of turning this into a money-generating enterprise. I don't want to deal with the legal or infrastructure headaches. Though if you happen to find me at a convention and want to say thanks, you can buy me a beer at GenCon. If you want to complain or sue me, I don't exist and don't attend GenCon. :D
 
-```markdown
-Syntax highlighted code block
+On data-retention: I use a piece of web programming functionality called Local Storage that act a little bit like cookies. The data is stored in your browser's cache for you for that browser. I have to specify both of those because it's not shared to other users on your computer, nor even other browsers. It certainly isn't shared to other computers, and I don't have access to it at all. So if you spend the time to create and save a cast of shadow denizens, make sure you create it on the computer you're bringing to the game session. Or print them out, that works too!
 
-# Header 1
-## Header 2
-### Header 3
+As with many side projects, there is a whole list of things I want to add to this utility. There are plenty of features that I haven't had the time to add yet. Since I'm not getting paid to work on this, it only happens when I do have spare time that isn't being spent on other things. And there will eventually come a time that I wash my hands of this and let it sit on a shelf to die from neglect. It may not be a nice thing to say, but it's the truth. This utility isn't meant to be a replacement for the Shadowrun books, either. I make an assumption that users are familiar with the basics of Shadowrun, from what an Adept is to what constitutes a Mr. Johnson, and are able to look things up as needed, like specific equipment information. It is meant as a supplement and assistant, much like how HeroLab and Chummer make PC creation easier for runners. I will not try to make this fully comprehensive and cover every possible option. There are too many source books to keep up with and this isn't meant to be a replacement for sourcebooks.
 
-- Bulleted
-- List
+Have fun with this tool! It is meant to be used and intended to make your life easier as a GM. Speaking of which, always try to offer your players the chance to make a deal with a dragon.
 
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/toktic/sr_gmt/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+_The Topps Company, Inc. has sole ownership of the names, logo, artwork, marks, photographs, sounds, audio, video and/or any proprietary matrial used in connection with the game Shadowrun. The Topps Company, Inc. has granted permission to GM Mob Master to use such names, logos, artwork, marks and/or any proprietary materials for promotional and informational purposes on its website but does not endorse, and is not affiliated with this utility in any official capacity whatsoever.<br />Original content within GM Mob Master is licensed under the Creative Commons Attribution-NonCommercial 4.0 International. So if you use anything here, please give credit where it is due. GM Mob Master is provided "as is" and no warranties or guarantees are provided or inferred. In no event shall the copyright holder or contributors be liable for damage however they are caused. Don't be a jerk!_
