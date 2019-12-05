@@ -100,7 +100,7 @@ var storage = {
 		{
 			if (tab_id === tab.tab_id)
 			{
-				if (tab_data.name !== null && tab_data.name !== tab.name)
+				if (tab_data.name != null && tab_data.name !== tab.name)
 				{
 					tab.name = tab_data.name;
 				}
@@ -243,6 +243,62 @@ var storage = {
 		{
 			storage.delete_character_from_tab(tab.tab_id, id);
 		});
+	},
+
+	// Clone the character, optionally adding them to the same tabs as the original
+	clone_character: function(id, clone_tabs)
+	{
+		var old_character = this.get_character(id), new_character, new_id;
+
+		new_character = $.extend({}, old_character);
+		delete new_character.character_id;
+
+		// Change the name, either adding "Copy", or updating the copy #
+		var copiedCharacter = new RegExp('.* Copy ([0-9])([0-9])');
+		var copyTest = copiedCharacter.exec(new_character.name);
+
+		if (copiedCharacter.test(new_character.name))
+		{
+			// Increment the copy number
+			new_character.name = new_character.name.slice(0, -2);
+
+			var newName = parseInt(copyTest[1]) * 10 + parseInt(copyTest[2]) + 1;
+
+			if (newName < 10)
+			{
+				newName = '0' + newName;
+			}
+
+			new_character.name += newName;
+		}
+		else if (new_character.name.slice(-5) == ' Copy')
+		{
+			new_character.name += ' 01';
+		}
+		else
+		{
+			new_character.name += ' Copy';
+		}
+
+		new_character = this.set_character(new_character);
+		new_id = new_character.character_id;
+
+		if (clone_tabs === true) {
+			var tabs = this.get_cast_tabs();
+
+			tabs.forEach(function(tab)
+			{
+				var old_char_index = tab.characters.indexOf(id);
+
+				if (tab.characters.includes(id))
+				{
+					tab.characters.splice(old_char_index + 1, 0, new_id);
+					storage.set_cast_tab(tab.tab_id, tab);
+				} 
+			});
+		}
+
+		return new_character;
 	},
 
 	// Return the ID of the newly created tab

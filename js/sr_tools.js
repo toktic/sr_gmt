@@ -147,6 +147,35 @@ function view_cast(show_intro)
 				$deletion_dialog.dialog('open');
 			});
 
+			$char_template.find('.tab_clone_dialog').detach();
+			var $clone_dialog = $char_template.find('.clone_dialog').dialog({
+				autoOpen: false,
+				modal: true,
+				title: 'Clone Cast Member',
+				width: 450,
+				buttons: [
+					{
+						text: "Ok",
+						click: function() {
+							storage.clone_character(cast.character_id);
+							$(this).dialog("close");
+							view_cast();
+						}
+					},
+					{
+						text: "Cancel",
+						click: function() {
+							$(this).dialog("close");
+						}
+					}
+				]
+			});
+
+			$char_template.find('.clone_cast_member').button().click(function ()
+			{
+				$clone_dialog.dialog('open');
+			});
+
 			$char_template.find('.created_date').html('Created: ' + render.format_string_date(cast.created));
 
 			if (cast.edited)
@@ -254,8 +283,42 @@ function view_cast(show_intro)
 					$deletion_dialog.dialog('open');
 				});
 
-				// TODO add a line saying when the character was created and when/if it was edited
+				$char_template.find('.clone_dialog').detach();
+				var $clone_dialog = $char_template.find('.tab_clone_dialog').dialog({
+					autoOpen: false,
+					modal: true,
+					title: 'Clone Cast Member',
+					width: 450,
+					buttons: [
+						{
+							text: "Ok",
+							click: function() {
+								storage.clone_character(character_id, true);
+								$(this).dialog("close");
+								view_cast();
+							}
+						},
+						{
+							text: "Cancel",
+							click: function() {
+								$(this).dialog("close");
+							}
+						}
+					]
+				});
 
+				$char_template.find('.clone_cast_member').button().click(function ()
+				{
+					$clone_dialog.dialog('open');
+				});
+
+				$char_template.find('.created_date').html('Created: ' + render.format_string_date(character.created));
+
+				if (character.edited)
+					$char_template.find('.edited_date').html('Last Edited: ' + render.format_string_date(character.edited));
+				else
+					$char_template.find('.edited_date').hide();
+	
 				$char_template.find('.add_to_tab').detach();
 			});
 		}
