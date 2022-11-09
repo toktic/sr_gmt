@@ -123,7 +123,7 @@ var render = {
 			}
 
 			// Attributes
-			var attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma'];
+			var attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma', 'edge', 'magic', 'resonance'];
 
 			attributes.forEach(function(attribute)
 			{
@@ -190,7 +190,7 @@ var render = {
 		// Race
 		$mook.find('select[name="race"] option[value="' + data.race + '"]').prop('selected', true);
 
-		var attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma'];
+		var attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma', 'edge', 'magic', 'resonance'];
 		var metatype_attributes = db.get_metatype_adjustment(data.race);
 
 		attributes.forEach(function(attribute)
@@ -221,7 +221,10 @@ var render = {
 				will: 0,
 				logic: 0,
 				intuition: 0,
-				charisma: 0
+				charisma: 0,
+				edge: 0,
+				magic: 0,
+				resonance: 0
 			};
 			var attributes = Object.keys(differences);
 			var original_attributes = db.get_metatype_adjustment(data.race);
@@ -249,10 +252,6 @@ var render = {
 		};
 
 		$mook.find('select[name="race"]').on('change', metatype_changed).change();
-
-		// Remove the Magic score, even if they have one
-		$mook.find('.attribute_names .magic, .attribute_names .initiate').hide();
-		$mook.find('.attribute_values .magic, .attribute_values .initiate').hide();
 
 		// Condition Monitor
 		$mook.find('.other_information .condition_monitor > div').buttonset();
@@ -794,7 +793,7 @@ var render = {
 
 		// Base Attributes
 		var augmented_attributes = this.calc_augmented_attributes(data);
-		var base_attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma'];
+		var base_attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma', 'edge', 'magic', 'resonance'];
 
 		base_attributes.forEach(function (i)
 		{
@@ -1631,7 +1630,7 @@ var render = {
 
 		// Base Attributes
 		var augmented_attributes = this.calc_augmented_attributes(data);
-		var base_attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma'];
+		var base_attributes = ['body', 'agility', 'reaction', 'strength', 'will', 'logic', 'intuition', 'charisma', 'edge', 'magic', 'resonance'];
 
 		base_attributes.forEach(function (i)
 		{
