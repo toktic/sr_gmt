@@ -2352,6 +2352,20 @@ var db = {
 				res.augmentations.push({name: 'Uneducated'});
 				break;
 
+			case 'Special':
+				res.max_attributes.agility = 30;
+				res.max_attributes.body = 30;
+				res.max_attributes.reaction = 30;
+				res.max_attributes.strength = 30;
+				res.max_attributes.will = 30;
+				res.max_attributes.logic = 30;
+				res.max_attributes.intuition = 30;
+				res.max_attributes.charisma = 30;
+				res.max_attributes.edge = 30;
+				res.max_attributes.magic = 30;
+				res.max_attributes.resonance = 30;
+				break;
+
 			default:
 				console.log('ERROR: get_metatype_adjustment() with no known metatype (' + race + ')');
 				res = false;
@@ -2557,7 +2571,7 @@ var db = {
 			max_rating: 3
 		},
 		{
-			name: 'Troll Dermal Deposits',
+			name: 'Troll Dermal Deposits (1)',
 			essence: 0,
 			selectable: false
 		},
